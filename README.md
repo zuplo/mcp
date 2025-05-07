@@ -2,8 +2,9 @@ A WinterTC compliant TypeScript SDK for MCP
 
 ---
 
-Inspired by [`modelcontextprotocol/typescript-sdk`], MIT licensed.
-Attributions included where necessary.
+# Attributions
+
+Inspired by and attributed to [`modelcontextprotocol/typescript-sdk`](https://github.com/modelcontextprotocol/typescript-sdk), MIT licensed.
 
 ---
 
