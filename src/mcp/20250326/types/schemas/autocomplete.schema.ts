@@ -16,8 +16,8 @@ import { z } from "zod";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
-} from "../../../../jsonrpc2/schemas/request";
-import { ResultSchema } from "../../../../jsonrpc2/schemas/response";
+} from "../../../../jsonrpc2/schemas/request.js";
+import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
 
 /**
  * A reference to a resource or resource template definition.

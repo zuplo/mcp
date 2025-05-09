@@ -13,7 +13,7 @@
  */
 
 import { z } from "zod";
-import { JSONRPC_VERSION } from "../consts";
+import { JSONRPC_VERSION } from "../consts.js";
 
 export const BaseNotificationParamsSchema = z
   .object({

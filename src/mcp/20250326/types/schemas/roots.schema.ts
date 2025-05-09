@@ -13,9 +13,9 @@
  */
 
 import { z } from "zod";
-import { RequestSchema } from "../../../../jsonrpc2/schemas/request";
-import { ResultSchema } from "../../../../jsonrpc2/schemas/response";
-import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications";
+import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
+import { RequestSchema } from "../../../../jsonrpc2/schemas/request.js";
+import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
 
 /* Roots */
 

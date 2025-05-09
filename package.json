@@ -5,9 +5,34 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "build:examples": "tsc -p tsconfig.examples.json",
+    "build:all": "tsc && tsc -p tsconfig.examples.json",
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest",
     "lint": "npx @biomejs/biome check src/",
-    "lint:format": "npx @biomejs/biome format src/ --write"
+    "lint:fix": "npx @biomejs/biome check src/ --fix",
+    "lint:fix-unsafe": "npx @biomejs/biome check src/ --fix --unsafe",
+    "format": "npx @biomejs/biome format src/ --write",
+    "example:ping": "node dist/examples/server/ping/index.js"
+  },
+  "files": [
+    "dist/**/**",
+    "docs/**/**",
+    "!**/*.spec.*",
+    "!**/*.test.*",
+    "!**/*.json",
+    "!**/*.tsbuildinfo",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    "./jsonrpc2/validation": {
+      "types": "./dist/jsonrpc2/validation.d.ts",
+      "import": "./dist/jsonrpc2/validation.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    }
   },
   "repository": {
     "type": "git",
@@ -28,6 +53,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "zod": "^3.24.4"
+    "zod": "^3.24.4",
+    "zod-to-json-schema": "^3.24.5"
   }
 }

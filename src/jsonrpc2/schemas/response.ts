@@ -13,8 +13,8 @@
  */
 
 import { z } from "zod";
-import { IdSchema } from "./id";
-import { JSONRPC_VERSION } from "../consts";
+import { JSONRPC_VERSION } from "../consts.js";
+import { IdSchema } from "./id.js";
 
 export const ResultSchema = z
   .object({

@@ -12,16 +12,16 @@
  * and is attributed to the original authors under the License.
  */
 
-import { JSONRPCErrorSchema } from "./schemas/error";
-import { JSONRPCNotificationSchema } from "./schemas/notifications";
-import { JSONRPCRequestSchema } from "./schemas/request";
-import { JSONRPCResponseSchema } from "./schemas/response";
-import {
+import { JSONRPCErrorSchema } from "./schemas/error.js";
+import { JSONRPCNotificationSchema } from "./schemas/notifications.js";
+import { JSONRPCRequestSchema } from "./schemas/request.js";
+import { JSONRPCResponseSchema } from "./schemas/response.js";
+import type {
   JSONRPCError,
   JSONRPCNotification,
   JSONRPCRequest,
   JSONRPCResponse,
-} from "./types";
+} from "./types.js";
 
 export const isJSONRPCRequest = (value: unknown): value is JSONRPCRequest =>
   JSONRPCRequestSchema.safeParse(value).success;

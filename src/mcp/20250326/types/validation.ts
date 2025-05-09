@@ -12,9 +12,9 @@
  * and is attributed to the original authors under the License.
  */
 
-import { InitializeRequestSchema } from "./schemas/initialize.schema";
-import { InitializedNotificationSchema } from "./schemas/notifications.schema";
-import { InitializedNotification, InitializeRequest } from "./types";
+import { InitializeRequestSchema } from "./schemas/initialize.schema.js";
+import { InitializedNotificationSchema } from "./schemas/notifications.schema.js";
+import type { InitializeRequest, InitializedNotification } from "./types.js";
 
 export const isInitializeRequest = (
   value: unknown

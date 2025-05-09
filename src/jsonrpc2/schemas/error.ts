@@ -13,8 +13,8 @@
  */
 
 import { z } from "zod";
-import { JSONRPC_VERSION } from "../consts";
-import { IdSchema } from "./id";
+import { JSONRPC_VERSION } from "../consts.js";
+import { IdSchema } from "./id.js";
 
 /**
  * A response to a request that indicates an error occurred.

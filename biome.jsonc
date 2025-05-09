@@ -13,6 +13,24 @@
       "**/package-lock.json"
     ]
   },
+  "linter": {
+    "enabled": true,
+
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUndeclaredVariables": "warn",
+        "useExhaustiveDependencies": "warn",
+        "useImportExtensions": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "error"
+      },
+      "style": {
+        "noDefaultExport": "off"
+      }
+    }
+  },
   "formatter": {
     "enabled": true,
     "useEditorconfig": true,

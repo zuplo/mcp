@@ -14,13 +14,13 @@
 
 import { z } from "zod";
 import {
-  BaseRequestParamsSchema,
-  RequestSchema,
-} from "../../../../jsonrpc2/schemas/request";
-import {
   BaseNotificationParamsSchema,
   NotificationSchema,
-} from "../../../../jsonrpc2/schemas/notifications";
+} from "../../../../jsonrpc2/schemas/notifications.js";
+import {
+  BaseRequestParamsSchema,
+  RequestSchema,
+} from "../../../../jsonrpc2/schemas/request.js";
 
 /**
  * The severity of a log message.

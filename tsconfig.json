@@ -1,16 +1,16 @@
 {
-  "include": ["src/**/*", "types/**/*"],
-  "exclude": ["src/**/*.test.ts", "node_modules", "dist"],
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "lib": ["ESNext", "WebWorker", "Webworker.Iterable"],
-    "sourceMap": true
-  }
+    "rootDir": "./src"
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+      "examples/**/*",
+      "src/**/*.test.ts",
+      "node_modules",
+      "dist"
+  ]
 }

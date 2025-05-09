@@ -12,31 +12,67 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import type { z } from "zod";
 
-import { ImplementationSchema } from "./schemas/implementation.schema";
-import {
+import type { EmptyResultSchema } from "../../../jsonrpc2/schemas/response.js";
+import type {
+  CompleteRequestSchema,
+  CompleteResultSchema,
+  PromptReferenceSchema,
+  ResourceReferenceSchema,
+} from "./schemas/autocomplete.schema.js";
+import type {
+  ClientCapabilitiesSchema,
+  ServerCapabilitiesSchema,
+} from "./schemas/capabilities.schema.js";
+import type {
+  ClientNotificationSchema,
+  ClientRequestSchema,
+  ClientResultSchema,
+} from "./schemas/client.schema.js";
+import type {
+  AudioContentSchema,
+  EmbeddedResourceSchema,
+  ImageContentSchema,
+  TextContentSchema,
+} from "./schemas/content.schema.js";
+import type { ImplementationSchema } from "./schemas/implementation.schema.js";
+import type {
+  InitializeRequestSchema,
+  InitializeResultSchema,
+} from "./schemas/initialize.schema.js";
+import type {
+  LoggingLevelSchema,
+  LoggingMessageNotificationSchema,
+  SetLevelRequestSchema,
+} from "./schemas/logging.schema.js";
+import type {
   CancelledNotificationSchema,
   InitializedNotificationSchema,
   ProgressNotificationSchema,
-} from "./schemas/notifications.schema";
-import {
-  ClientCapabilitiesSchema,
-  ServerCapabilitiesSchema,
-} from "./schemas/capabilities.schema";
-import { EmptyResultSchema } from "../../../jsonrpc2/schemas/response";
-import { PingRequestSchema } from "./schemas/ping.schema";
-import { ProgressSchema } from "./schemas/progress.schema";
-import {
+} from "./schemas/notifications.schema.js";
+import type {
   PaginatedRequestSchema,
   PaginatedResultSchema,
-} from "./schemas/pagination.schema";
-import {
+} from "./schemas/pagination.schema.js";
+import type { PingRequestSchema } from "./schemas/ping.schema.js";
+import type { ProgressSchema } from "./schemas/progress.schema.js";
+import type {
+  GetPromptRequestSchema,
+  GetPromptResultSchema,
+  ListPromptsRequestSchema,
+  ListPromptsResultSchema,
+  PromptArgumentSchema,
+  PromptListChangedNotificationSchema,
+  PromptMessageSchema,
+  PromptSchema,
+} from "./schemas/prompt.schema.js";
+import type {
   BlobResourceContentsSchema,
-  ListResourcesRequestSchema,
-  ListResourcesResultSchema,
   ListResourceTemplatesRequestSchema,
   ListResourceTemplatesResultSchema,
+  ListResourcesRequestSchema,
+  ListResourcesResultSchema,
   ReadResourceRequestSchema,
   ReadResourceResultSchema,
   ResourceContentsSchema,
@@ -47,24 +83,24 @@ import {
   SubscribeRequestSchema,
   TextResourceContentsSchema,
   UnsubscribeRequestSchema,
-} from "./schemas/resource.schema";
-import {
-  GetPromptRequestSchema,
-  GetPromptResultSchema,
-  ListPromptsRequestSchema,
-  ListPromptsResultSchema,
-  PromptArgumentSchema,
-  PromptListChangedNotificationSchema,
-  PromptMessageSchema,
-  PromptSchema,
-} from "./schemas/prompt.schema";
-import {
-  AudioContentSchema,
-  EmbeddedResourceSchema,
-  ImageContentSchema,
-  TextContentSchema,
-} from "./schemas/content.schema";
-import {
+} from "./schemas/resource.schema.js";
+import type {
+  ListRootsRequestSchema,
+  ListRootsResultSchema,
+  RootSchema,
+  RootsListChangedNotificationSchema,
+} from "./schemas/roots.schema.js";
+import type {
+  CreateMessageRequestSchema,
+  CreateMessageResultSchema,
+  SamplingMessageSchema,
+} from "./schemas/sampling.schema.js";
+import type {
+  ServerNotificationSchema,
+  ServerRequestSchema,
+  ServerResultSchema,
+} from "./schemas/server.schema.js";
+import type {
   CallToolRequestSchema,
   CallToolResultSchema,
   CompatibilityCallToolResultSchema,
@@ -73,43 +109,7 @@ import {
   ToolAnnotationsSchema,
   ToolListChangedNotificationSchema,
   ToolSchema,
-} from "./schemas/tools.schema";
-import {
-  LoggingLevelSchema,
-  LoggingMessageNotificationSchema,
-  SetLevelRequestSchema,
-} from "./schemas/logging.schema";
-import {
-  CreateMessageRequestSchema,
-  CreateMessageResultSchema,
-  SamplingMessageSchema,
-} from "./schemas/sampling.schema";
-import {
-  CompleteRequestSchema,
-  CompleteResultSchema,
-  PromptReferenceSchema,
-  ResourceReferenceSchema,
-} from "./schemas/autocomplete.schema";
-import {
-  ListRootsRequestSchema,
-  ListRootsResultSchema,
-  RootSchema,
-  RootsListChangedNotificationSchema,
-} from "./schemas/roots.schema";
-import {
-  ClientNotificationSchema,
-  ClientRequestSchema,
-  ClientResultSchema,
-} from "./schemas/client.schema";
-import {
-  ServerNotificationSchema,
-  ServerRequestSchema,
-  ServerResultSchema,
-} from "./schemas/server.schema";
-import {
-  InitializeRequestSchema,
-  InitializeResultSchema,
-} from "./schemas/initialize.schema";
+} from "./schemas/tools.schema.js";
 
 /* Initialization */
 export type Implementation = z.infer<typeof ImplementationSchema>;

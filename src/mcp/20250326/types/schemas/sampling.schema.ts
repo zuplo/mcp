@@ -14,15 +14,15 @@
 
 import { z } from "zod";
 import {
+  BaseRequestParamsSchema,
+  RequestSchema,
+} from "../../../../jsonrpc2/schemas/request.js";
+import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
+import {
   AudioContentSchema,
   ImageContentSchema,
   TextContentSchema,
-} from "./content.schema";
-import {
-  BaseRequestParamsSchema,
-  RequestSchema,
-} from "../../../../jsonrpc2/schemas/request";
-import { ResultSchema } from "../../../../jsonrpc2/schemas/response";
+} from "./content.schema.js";
 
 /**
  * Hints to use for model selection.
