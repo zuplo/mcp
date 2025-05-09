@@ -1,5 +1,5 @@
 {
-  "name": "@zuplo/mcp ping example",
+  "name": "@zuplo/mcp example tools server",
   "private": true,
   "type": "module",
   "scripts": {
