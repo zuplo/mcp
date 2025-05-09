@@ -8,7 +8,7 @@ import type { JSONRPCMessage } from "../jsonrpc2/types.js";
  */
 export type MessageHandler = (
   message: JSONRPCMessage
-) => Promise<JSONRPCMessage | undefined>;
+) => Promise<JSONRPCMessage | null>;
 
 export interface TransportOptions {
   timeout?: number;
