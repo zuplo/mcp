@@ -1,5 +1,7 @@
 <h1>
-  `@zuplo/mcp`
+  <p align="center">
+    <code>@zuplo/mcp</code>
+  </p>
 </h1>
   <p align="center">
     A WinterTC compliant, remote server first, TypeScript SDK for MCP.
