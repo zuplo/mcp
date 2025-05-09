@@ -13,22 +13,22 @@
  */
 
 import { z } from "zod";
+import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import {
-  PaginatedRequestSchema,
-  PaginatedResultSchema,
-} from "./pagination.schema";
-import { ResultSchema } from "../../../../jsonrpc2/schemas/response";
+  BaseRequestParamsSchema,
+  RequestSchema,
+} from "../../../../jsonrpc2/schemas/request.js";
+import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
 import {
   AudioContentSchema,
   EmbeddedResourceSchema,
   ImageContentSchema,
   TextContentSchema,
-} from "./content.schema";
+} from "./content.schema.js";
 import {
-  BaseRequestParamsSchema,
-  RequestSchema,
-} from "../../../../jsonrpc2/schemas/request";
-import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications";
+  PaginatedRequestSchema,
+  PaginatedResultSchema,
+} from "./pagination.schema.js";
 
 /**
  * Additional properties describing a Tool to clients.

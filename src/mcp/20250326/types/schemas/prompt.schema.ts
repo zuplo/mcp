@@ -13,22 +13,22 @@
  */
 
 import { z } from "zod";
-import {
-  PaginatedRequestSchema,
-  PaginatedResultSchema,
-} from "./pagination.schema";
+import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
-} from "../../../../jsonrpc2/schemas/request";
-import { ResultSchema } from "../../../../jsonrpc2/schemas/response";
+} from "../../../../jsonrpc2/schemas/request.js";
+import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
 import {
   AudioContentSchema,
   EmbeddedResourceSchema,
   ImageContentSchema,
   TextContentSchema,
-} from "./content.schema";
-import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications";
+} from "./content.schema.js";
+import {
+  PaginatedRequestSchema,
+  PaginatedResultSchema,
+} from "./pagination.schema.js";
 
 /**
  * Describes an argument that a prompt can accept.

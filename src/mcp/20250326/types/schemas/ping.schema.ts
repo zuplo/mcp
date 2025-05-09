@@ -13,7 +13,7 @@
  */
 
 import { z } from "zod";
-import { RequestSchema } from "../../../../jsonrpc2/schemas/request";
+import { RequestSchema } from "../../../../jsonrpc2/schemas/request.js";
 
 /**
  * A ping, issued by either the server or the client, to check that the other

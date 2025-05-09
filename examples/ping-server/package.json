@@ -1,0 +1,12 @@
+{
+  "name": "@zuplo/mcp ping example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@zuplo/mcp": "file:../../"
+  }
+}

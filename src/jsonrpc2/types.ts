@@ -12,22 +12,25 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
-import {
+import type { z } from "zod";
+import type { CursorSchema } from "./schemas/cursor.js";
+import type { JSONRPCErrorSchema } from "./schemas/error.js";
+import type { IdSchema } from "./schemas/id.js";
+import type { JSONRPCMessageSchema } from "./schemas/message.js";
+import type {
+  JSONRPCNotificationSchema,
+  NotificationSchema,
+} from "./schemas/notifications.js";
+import type {
   JSONRPCRequestSchema,
   ProgressTokenSchema,
   RequestMetaSchema,
   RequestSchema,
-} from "./schemas/request";
-import {
-  JSONRPCNotificationSchema,
-  NotificationSchema,
-} from "./schemas/notifications";
-import { JSONRPCResponseSchema, ResultSchema } from "./schemas/response";
-import { JSONRPCErrorSchema } from "./schemas/error";
-import { JSONRPCMessageSchema } from "./schemas/message";
-import { CursorSchema } from "./schemas/cursor";
-import { IdSchema } from "./schemas/id";
+} from "./schemas/request.js";
+import type {
+  JSONRPCResponseSchema,
+  ResultSchema,
+} from "./schemas/response.js";
 
 /* JSON-RPC core types */
 export type ProgressToken = z.infer<typeof ProgressTokenSchema>;

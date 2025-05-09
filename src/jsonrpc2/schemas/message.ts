@@ -13,10 +13,10 @@
  */
 
 import { z } from "zod";
-import { JSONRPCRequestSchema } from "./request";
-import { JSONRPCNotificationSchema } from "./notifications";
-import { JSONRPCResponseSchema } from "./response";
-import { JSONRPCErrorSchema } from "./error";
+import { JSONRPCErrorSchema } from "./error.js";
+import { JSONRPCNotificationSchema } from "./notifications.js";
+import { JSONRPCRequestSchema } from "./request.js";
+import { JSONRPCResponseSchema } from "./response.js";
 
 export const JSONRPCMessageSchema = z.union([
   JSONRPCRequestSchema,

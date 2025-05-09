@@ -14,18 +14,18 @@
 
 import { z } from "zod";
 import {
-  PaginatedRequestSchema,
-  PaginatedResultSchema,
-} from "./pagination.schema";
+  BaseNotificationParamsSchema,
+  NotificationSchema,
+} from "../../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
-} from "../../../../jsonrpc2/schemas/request";
-import { ResultSchema } from "../../../../jsonrpc2/schemas/response";
+} from "../../../../jsonrpc2/schemas/request.js";
+import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
 import {
-  BaseNotificationParamsSchema,
-  NotificationSchema,
-} from "../../../../jsonrpc2/schemas/notifications";
+  PaginatedRequestSchema,
+  PaginatedResultSchema,
+} from "./pagination.schema.js";
 
 /* Resources */
 

@@ -16,7 +16,7 @@ import { z } from "zod";
 import {
   BlobResourceContentsSchema,
   TextResourceContentsSchema,
-} from "./resource.schema";
+} from "./resource.schema.js";
 
 /**
  * Text provided to or from an LLM.

@@ -13,13 +13,13 @@
  */
 
 import { z } from "zod";
-import { ProgressSchema } from "./progress.schema";
-import { ProgressTokenSchema } from "../../../../jsonrpc2/schemas/request";
+import { IdSchema } from "../../../../jsonrpc2/schemas/id.js";
 import {
   BaseNotificationParamsSchema,
   NotificationSchema,
-} from "../../../../jsonrpc2/schemas/notifications";
-import { IdSchema } from "../../../../jsonrpc2/schemas/id";
+} from "../../../../jsonrpc2/schemas/notifications.js";
+import { ProgressTokenSchema } from "../../../../jsonrpc2/schemas/request.js";
+import { ProgressSchema } from "./progress.schema.js";
 
 /**
  * This notification can be sent by either side to indicate that it is

@@ -13,34 +13,34 @@
  */
 
 import { z } from "zod";
-import { PingRequestSchema } from "./ping.schema";
-import { CreateMessageRequestSchema } from "./sampling.schema";
-import { ListRootsRequestSchema } from "./roots.schema";
+import { EmptyResultSchema } from "../../../../jsonrpc2/schemas/response.js";
+import { CompleteResultSchema } from "./autocomplete.schema.js";
+import { InitializeResultSchema } from "./initialize.schema.js";
+import { LoggingMessageNotificationSchema } from "./logging.schema.js";
 import {
   CancelledNotificationSchema,
   ProgressNotificationSchema,
 } from "./notifications.schema";
-import { LoggingMessageNotificationSchema } from "./logging.schema";
-import {
-  ListResourcesResultSchema,
-  ListResourceTemplatesResultSchema,
-  ReadResourceResultSchema,
-  ResourceListChangedNotificationSchema,
-  ResourceUpdatedNotificationSchema,
-} from "./resource.schema";
-import {
-  CallToolResultSchema,
-  ListToolsResultSchema,
-  ToolListChangedNotificationSchema,
-} from "./tools.schema";
+import { PingRequestSchema } from "./ping.schema";
 import {
   GetPromptResultSchema,
   ListPromptsResultSchema,
   PromptListChangedNotificationSchema,
 } from "./prompt.schema";
-import { EmptyResultSchema } from "../../../../jsonrpc2/schemas/response";
-import { CompleteResultSchema } from "./autocomplete.schema";
-import { InitializeResultSchema } from "./initialize.schema";
+import {
+  ListResourceTemplatesResultSchema,
+  ListResourcesResultSchema,
+  ReadResourceResultSchema,
+  ResourceListChangedNotificationSchema,
+  ResourceUpdatedNotificationSchema,
+} from "./resource.schema";
+import { ListRootsRequestSchema } from "./roots.schema";
+import { CreateMessageRequestSchema } from "./sampling.schema";
+import {
+  CallToolResultSchema,
+  ListToolsResultSchema,
+  ToolListChangedNotificationSchema,
+} from "./tools.schema";
 
 /**
  * Server request unions

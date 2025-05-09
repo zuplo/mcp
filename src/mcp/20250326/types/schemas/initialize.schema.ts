@@ -16,13 +16,13 @@ import { z } from "zod";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
-} from "../../../../jsonrpc2/schemas/request";
+} from "../../../../jsonrpc2/schemas/request.js";
+import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
 import {
   ClientCapabilitiesSchema,
   ServerCapabilitiesSchema,
 } from "./capabilities.schema";
 import { ImplementationSchema } from "./implementation.schema";
-import { ResultSchema } from "../../../../jsonrpc2/schemas/response";
 
 /**
  * This request is sent from the client to the server when it first connects,

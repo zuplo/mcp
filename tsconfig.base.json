@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "WebWorker", "Webworker.Iterable"],
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "@zuplo/mcp/*": ["./src/*"]
+    }
+  }
+}
