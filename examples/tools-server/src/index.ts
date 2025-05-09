@@ -5,17 +5,19 @@ import { z } from "zod";
 
 // Create a simple server
 const server = new MCPServer({
-  name: "Example Ping Server",
+  name: "Example Tools Server",
   version: "1.0.0",
 });
 
-server.addTool(
-  "add",
-  z.object({ a: z.number(), b: z.number() }),
-  async ({ a, b }) => (
-    [{ type: "text", text: String(a + b) }]
-  )
-);
+server.addTool({
+  name: "add",
+  description: "Adds two numbers together and returns the result.",
+  schema: z.object({ a: z.number(), b: z.number() }),
+  handler: async ({ a, b }) => ({
+    content: [{ type: "text", text: String(a + b) }],
+    isError: false,
+  })
+});
 
 // Example ping request
 const toolRequest: JSONRPCRequest = {

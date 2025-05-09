@@ -1,4 +1,4 @@
-import { AnyZodObject, type ZodSchema, z } from "zod";
+import { type ZodSchema, z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
 import type {
   JSONRPCError,
@@ -7,8 +7,13 @@ import type {
   JSONRPCResponse,
 } from "../jsonrpc2/types.js";
 import { CallToolRequestSchema } from "../mcp/20250326/types/schemas/tools.schema.js";
-import type { ServerResult, ServerCapabilities, Tool } from "../mcp/20250326/types/types.js";
-import type { MCPServerOptions, RegisteredTool, ToolHandler } from "./types.js";
+import type {
+  ServerResult,
+  ServerCapabilities,
+  Tool,
+  CallToolResult,
+} from "../mcp/20250326/types/types.js";
+import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
 
 export class MCPServer {
   private capabilities: ServerCapabilities;
@@ -49,22 +54,27 @@ export class MCPServer {
   /**
    * Register a tool
    */
-  public addTool<S extends ZodSchema, R = unknown>(
-    name: string,
-    paramSchema: S,
-    handler: ToolHandler<S, R>,
-    description = `Execute the ${name} tool`
-  ): void {
+  public addTool<
+    S extends ZodSchema,
+    R extends CallToolResult = CallToolResult,
+  >(config: ToolConfig<S, R>): void {
+    const {
+      name,
+      schema,
+      handler,
+      description = `Execute the ${name} tool`,
+    } = config;
+
     // Create tool schema from zod schema
     const toolSchema: Tool = {
       name,
       description,
-      inputSchema: zodToJsonSchema(paramSchema) as Tool["inputSchema"],
+      inputSchema: zodToJsonSchema(schema) as Tool["inputSchema"],
     };
 
     const registeredTool: RegisteredTool<S, R> = {
       toolSchema: toolSchema,
-      inputSchema: paramSchema,
+      inputSchema: schema,
       handler,
     };
 
@@ -249,8 +259,8 @@ export class MCPServer {
       const result = await tool.handler(validatedParams);
       const serverResponse: ServerResult = {
         content: result,
-        isError: false
-      }
+        isError: false,
+      };
       return {
         jsonrpc: "2.0",
         id: request.id,
