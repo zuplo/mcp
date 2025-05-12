@@ -7,6 +7,8 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@zuplo/mcp": "file:../../"
+    "@hono/node-server": "^1.14.1",
+    "@zuplo/mcp": "file:../../",
+    "hono": "^4.7.9"
   }
 }
