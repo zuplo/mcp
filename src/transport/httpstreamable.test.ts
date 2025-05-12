@@ -74,6 +74,6 @@ describe("HTTPStreamableTransport Accept header validation", () => {
 
     expect(response.status).toBe(200);
     const responseBody = await response.json();
-    expect(responseBody.result.pong).toBe(true);
+    expect(responseBody.result).toEqual({});
   });
 });

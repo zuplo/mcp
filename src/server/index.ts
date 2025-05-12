@@ -14,6 +14,7 @@ import type {
   Tool,
   CallToolResult,
   InitializeResult,
+  ListToolsResult,
 } from "../mcp/20250326/types/types.js";
 import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
 import { Transport } from "../transport/types.js";
@@ -38,7 +39,6 @@ export class MCPServer {
 
     // Set default capabilities
     this.capabilities = {
-      ping: true,
       tools: {
         supported: true,
         available: [],
@@ -47,7 +47,6 @@ export class MCPServer {
     };
   }
 
-  // In MCPServer class
   public withTransport(transport: Transport) {
     transport.onMessage(async (message): Promise<JSONRPCMessage | null> => {
       try {
@@ -163,26 +162,26 @@ export class MCPServer {
     request: JSONRPCRequest
   ): Promise<JSONRPCResponse | JSONRPCError> {
     try {
-      // Handle built-in methods
-      if (request.method === "ping") {
-        return this.handlePing(request);
+      switch (request.method) {
+        case "ping":
+          return this.handlePing(request);
+        case "initialize":
+          return this.handleInitialize(request);
+        case "tools/list":
+          return this.handleToolListRequest(request);
+        case "tools/call":
+          return this.handleToolCallRequest(request);
+        default:
+          // Method not found
+          return {
+            jsonrpc: "2.0",
+            id: request.id,
+            error: {
+              code: -32601,
+              message: `Method "${request.method}" not found`,
+            },
+          };
       }
-      if (request.method === "initialize") {
-        return this.handleInitialize(request);
-      }
-      if (request.method === "tools/call") {
-        return this.handleToolRequest(request);
-      }
-
-      // Method not found
-      return {
-        jsonrpc: "2.0",
-        id: request.id,
-        error: {
-          code: -32601,
-          message: `Method "${request.method}" not found`,
-        },
-      };
     } catch (error) {
       console.error("Error handling request:", error);
 
@@ -204,30 +203,17 @@ export class MCPServer {
   public async handleNotification(
     notification: JSONRPCNotification
   ): Promise<void> {
-    throw new Error("Method not implemented.");
+    console.log("received notification", notification.method);
   }
 
   /**
-   * Handle ping request
+   * Handle ping request - the server MUST respond with an empty request.
    */
   private handlePing(request: JSONRPCRequest): JSONRPCResponse | JSONRPCError {
-    if (!this.capabilities.ping) {
-      return {
-        jsonrpc: "2.0",
-        id: request.id,
-        error: {
-          code: -32601,
-          message: "Method 'ping' not supported",
-        },
-      };
-    }
-
     return {
       jsonrpc: "2.0",
       id: request.id,
-      result: {
-        pong: true,
-      },
+      result: {},
     };
   }
 
@@ -242,7 +228,7 @@ export class MCPServer {
         name: this.name,
         version: this.version,
       },
-      ...(this.instructions ? { instructions: this.instructions } : {})
+      ...(this.instructions ? { instructions: this.instructions } : {}),
     };
 
     return {
@@ -252,10 +238,32 @@ export class MCPServer {
     };
   }
 
+  private async handleToolListRequest(
+    request: JSONRPCRequest
+  ): Promise<JSONRPCResponse | JSONRPCError> {
+    // Map over the tools Map to create an array of Tool objects
+    const toolsArray = Array.from(this.tools.entries()).map(
+      ([name, registeredTool]) => {
+        // Extract the toolSchema which already has the correct structure
+        return registeredTool.toolSchema;
+      }
+    );
+
+    const toolList: ListToolsResult = {
+      tools: toolsArray,
+    };
+
+    return {
+      jsonrpc: "2.0",
+      id: request.id,
+      result: toolList,
+    };
+  }
+
   /**
    * Handle tool request
    */
-  private async handleToolRequest(
+  private async handleToolCallRequest(
     request: JSONRPCRequest
   ): Promise<JSONRPCResponse | JSONRPCError> {
     const validatedToolCall = CallToolRequestSchema.safeParse(request);
