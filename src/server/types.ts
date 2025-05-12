@@ -9,7 +9,7 @@ import type {
  * Handler function for tool execution
  */
 export type ToolHandler<
-  S extends ZodSchema,
+  S extends ZodSchema = ZodSchema,
   R extends CallToolResult = CallToolResult,
 > = (params: z.infer<S>) => Promise<R> | R;
 
@@ -17,7 +17,7 @@ export type ToolHandler<
  * Configuration for registering a tool
  */
 export interface ToolConfig<
-  S extends ZodSchema,
+  S extends ZodSchema = ZodSchema,
   R extends CallToolResult = CallToolResult,
 > {
   name: string;
@@ -29,13 +29,10 @@ export interface ToolConfig<
 /**
  * Internal storage type for registered tools
  */
-export type RegisteredTool<
-  S extends ZodSchema = ZodSchema,
-  R extends CallToolResult = CallToolResult,
-> = {
+export type RegisteredTool = {
   toolSchema: Tool;
-  inputSchema: S;
-  handler: ToolHandler<S, R>;
+  inputSchema: ZodSchema;
+  handler: (params: unknown) => Promise<CallToolResult> | CallToolResult;
 };
 
 /**

@@ -16,7 +16,12 @@ import type {
   InitializeResult,
   ListToolsResult,
 } from "../mcp/20250326/types/types.js";
-import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
+import type {
+  MCPServerOptions,
+  RegisteredTool,
+  ToolConfig,
+  ToolHandler,
+} from "./types.js";
 import { Transport } from "../transport/types.js";
 import {
   isJSONRPCNotification,
@@ -27,7 +32,7 @@ import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
 
 export class MCPServer {
   private capabilities: ServerCapabilities;
-  private tools: Map<string, RegisteredTool<any, any>> = new Map();
+  private tools: Map<string, RegisteredTool> = new Map();
   private name: string;
   private version: string;
   private instructions: string | undefined;
@@ -106,7 +111,7 @@ export class MCPServer {
    * Register a tool
    */
   public addTool<
-    S extends ZodSchema,
+    S extends ZodSchema = ZodSchema,
     R extends CallToolResult = CallToolResult,
   >(config: ToolConfig<S, R>): void {
     const {
@@ -123,7 +128,7 @@ export class MCPServer {
       inputSchema: zodToJsonSchema(schema) as Tool["inputSchema"],
     };
 
-    const registeredTool: RegisteredTool<S, R> = {
+    const registeredTool: RegisteredTool = {
       toolSchema: toolSchema,
       inputSchema: schema,
       handler,
@@ -280,9 +285,7 @@ export class MCPServer {
     }
 
     const toolCallReq = validatedToolCall.data;
-    console.log("toolCallReq data", toolCallReq);
     const toolName = toolCallReq.params.name;
-    console.log("tool name", toolName);
 
     const tool = this.tools.get(toolName);
     if (!tool) {
@@ -320,14 +323,11 @@ export class MCPServer {
     // Execute the tool
     try {
       const result = await tool.handler(validatedParams);
-      const serverResponse: ServerResult = {
-        content: result,
-        isError: false,
-      };
+
       return {
         jsonrpc: "2.0",
         id: request.id,
-        result: serverResponse,
+        result: result,
       };
     } catch (error) {
       console.error(`Error executing tool "${toolName}":`, error);
