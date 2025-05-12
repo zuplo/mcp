@@ -6,7 +6,7 @@
   </p>
 </h1>
   <p align="center">
-    A `fetch` API based, remote server first, TypeScript SDK for MCP.
+    A <code>fetch</code> API based, remote server first, TypeScript SDK for MCP.
     <br />
     <a href="#about">About</a>
     ·
@@ -27,7 +27,7 @@ Inspired by (with MIT Licensed attributions) - [`modelcontextprotocol/typescript
 # 🚀 About
 
 `@zuplo/mcp` is a remote server first MCP SDK that aims to be ["minimum common API" compliant as defined by the WinterTC](https://min-common-api.proposal.wintertc.org/).
-It uses the `fetch` APIs and is intended to work out of the box on Zuplo, Node, Deno, Workerd, etc.
+It uses the [`fetch` APIs](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and is intended to work out of the box on Zuplo, Node, Deno, Workerd, etc.
 
 # 📝 Documentation
 
