@@ -9,8 +9,8 @@ const app = new Hono();
 
 // MCP server
 const server = new MCPServer({
-  name: "Example Ping Server",
-  version: "1.0.0",
+  name: "Calculator",
+  version: "0.0.0",
 });
 
 // addition
