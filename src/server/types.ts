@@ -56,4 +56,9 @@ export interface MCPServerOptions {
    * Custom capabilities (will be merged with defaults)
    */
   capabilities?: ServerCapabilities;
+
+  /**
+   * Custom, optional instructions to provide to the client during initialization
+   */
+  instructions?: string;
 }

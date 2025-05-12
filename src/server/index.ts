@@ -13,6 +13,7 @@ import type {
   ServerCapabilities,
   Tool,
   CallToolResult,
+  InitializeResult,
 } from "../mcp/20250326/types/types.js";
 import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
 import { Transport } from "../transport/types.js";
@@ -21,16 +22,19 @@ import {
   isJSONRPCRequest,
   isJSONRPCResponse,
 } from "../jsonrpc2/validation.js";
+import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
 
 export class MCPServer {
   private capabilities: ServerCapabilities;
   private tools: Map<string, RegisteredTool<any, any>> = new Map();
   private name: string;
   private version: string;
+  private instructions: string | undefined;
 
   constructor(options: MCPServerOptions) {
     this.name = options.name || "MCP Server";
     this.version = options.version || "1.0.0";
+    this.instructions = options.instructions || undefined;
 
     // Set default capabilities
     this.capabilities = {
@@ -231,17 +235,20 @@ export class MCPServer {
    * Handle initialize request
    */
   private handleInitialize(request: JSONRPCRequest): JSONRPCResponse {
-    // Return initialization result with server capabilities
+    const initResponse: InitializeResult = {
+      protocolVersion: LATEST_PROTOCOL_VERSION,
+      capabilities: this.getCapabilities(),
+      serverInfo: {
+        name: this.name,
+        version: this.version,
+      },
+      ...(this.instructions ? { instructions: this.instructions } : {})
+    };
+
     return {
       jsonrpc: "2.0",
       id: request.id,
-      result: {
-        server: {
-          name: this.name,
-          version: this.version,
-        },
-        capabilities: this.getCapabilities(),
-      },
+      result: initResponse,
     };
   }
 
