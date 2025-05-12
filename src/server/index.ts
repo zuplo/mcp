@@ -2,6 +2,7 @@ import { type ZodSchema, z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
 import type {
   JSONRPCError,
+  JSONRPCMessage,
   JSONRPCNotification,
   JSONRPCRequest,
   JSONRPCResponse,
@@ -14,6 +15,12 @@ import type {
   CallToolResult,
 } from "../mcp/20250326/types/types.js";
 import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
+import { Transport } from "../transport/types.js";
+import {
+  isJSONRPCNotification,
+  isJSONRPCRequest,
+  isJSONRPCResponse,
+} from "../jsonrpc2/validation.js";
 
 export class MCPServer {
   private capabilities: ServerCapabilities;
@@ -34,6 +41,47 @@ export class MCPServer {
       },
       ...options.capabilities,
     };
+  }
+
+  // In MCPServer class
+  public withTransport(transport: Transport) {
+    transport.onMessage(async (message): Promise<JSONRPCMessage | null> => {
+      try {
+        if (isJSONRPCRequest(message)) {
+          const response = await this.handleRequest(message);
+          if (response) {
+            await transport.send(response);
+            return response;
+          }
+        } else if (isJSONRPCNotification(message)) {
+          await this.handleNotification(message);
+          return null;
+        } else if (isJSONRPCResponse(message)) {
+          console.log("Received response:", message);
+          return null;
+        }
+      } catch (error) {
+        console.error("Error processing message:", error);
+
+        // Send error response for requests
+        if (isJSONRPCRequest(message)) {
+          const errorResponse: JSONRPCError = {
+            jsonrpc: "2.0",
+            id: message.id,
+            error: {
+              code: -32603,
+              message:
+                error instanceof Error ? error.message : "Internal error",
+            },
+          };
+
+          await transport.send(errorResponse);
+          return errorResponse;
+        }
+      }
+
+      return null;
+    });
   }
 
   getTool(name: string): Tool | undefined {

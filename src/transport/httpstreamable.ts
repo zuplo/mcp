@@ -46,6 +46,7 @@ export class HTTPStreamableTransport implements Transport {
 
   private options: TransportOptions;
   private connected = false;
+  private enableStreaming = false;
   private sessions: Map<string, Session> = new Map();
   private streams: Map<string, StreamInfo> = new Map();
 
@@ -275,10 +276,26 @@ export class HTTPStreamableTransport implements Transport {
       !acceptHeader.includes("application/json") &&
       !acceptHeader.includes("text/event-stream")
     ) {
-      return new Response(null, {
-        status: 406, // Not Acceptable
-        headers: { "Content-Type": "application/json" },
-      });
+      /**
+       * Not Acceptable.
+       * HTTP Streamable clients must be able to accept HTTP JSON (typically in
+       * a stateless mode) and through the legacy SSE streams.
+       */
+      return new Response(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          error: {
+            code: -32600,
+            message:
+              "Not Acceptable: Client must accept application/json and text/event-stream",
+          },
+          id: null,
+        }),
+        {
+          status: 406,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Extract JSON-RPC message(s) from request
@@ -302,7 +319,6 @@ export class HTTPStreamableTransport implements Transport {
 
     // Check if this contains any requests
     const hasRequests = messageArray.some((msg) => this.isRequest(msg));
-    const onlyNotificationsOrResponses = !hasRequests;
 
     // Handle session initialization
     if (
@@ -320,7 +336,7 @@ export class HTTPStreamableTransport implements Transport {
     // Process messages
     try {
       // For messages that are only notifications or responses
-      if (onlyNotificationsOrResponses) {
+      if (!hasRequests) {
         for (const message of messageArray) {
           await this.messageHandler?.(message);
         }
@@ -330,8 +346,41 @@ export class HTTPStreamableTransport implements Transport {
         });
       }
 
-      // For requests or batches containing requests
-      // Create SSE stream for responses
+      if (!this.enableStreaming) {
+        const responses: JSONRPCResponse[] = [];
+
+        for (const message of messageArray) {
+          if (this.isRequest(message)) {
+            // Process the request and get a direct response
+            const response = (await this.messageHandler?.(
+              message
+            )) as JSONRPCResponse;
+            if (response) {
+              responses.push(response);
+            }
+          } else {
+            // Process notification or response
+            await this.messageHandler?.(message);
+          }
+        }
+
+        // Return a direct JSON response
+        const responseBody = responses.length === 1 ? responses[0] : responses;
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+
+        if (session) {
+          headers["Mcp-Session-Id"] = session.id;
+        }
+
+        return new Response(JSON.stringify(responseBody), {
+          status: 200,
+          headers,
+        });
+      }
+
+      // Otherwise, use SSE for more complex cases (the existing code)
       const { stream, streamId } = this.createStream(session);
       const responsePromises: Promise<JSONRPCResponse | undefined>[] = [];
 
@@ -351,9 +400,6 @@ export class HTTPStreamableTransport implements Transport {
         }
       }
 
-      // Decide if we want to use SSE or direct response
-      // For simplicity, always use SSE if there are requests
-      // (A more sophisticated implementation might optimize for single-request cases)
       const headers: Record<string, string> = {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",

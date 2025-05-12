@@ -32,6 +32,10 @@
     "./server": {
       "types": "./dist/server/index.d.ts",
       "import": "./dist/server/index.js"
+    },
+    "./transport/httpstreamable": {
+      "types": "./dist/transport/httpstreamable.d.ts",
+      "import": "./dist/transport/httpstreamable.js"
     }
   },
   "repository": {
