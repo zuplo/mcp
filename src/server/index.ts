@@ -9,19 +9,13 @@ import type {
 } from "../jsonrpc2/types.js";
 import { CallToolRequestSchema } from "../mcp/20250326/types/schemas/tools.schema.js";
 import type {
-  ServerResult,
   ServerCapabilities,
   Tool,
   CallToolResult,
   InitializeResult,
   ListToolsResult,
 } from "../mcp/20250326/types/types.js";
-import type {
-  MCPServerOptions,
-  RegisteredTool,
-  ToolConfig,
-  ToolHandler,
-} from "./types.js";
+import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
 import { Transport } from "../transport/types.js";
 import {
   isJSONRPCNotification,
