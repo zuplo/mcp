@@ -23,8 +23,17 @@ jobs:
       packages: write
 
     steps:
+      # Must create the token first as the checkout step needs to use this token
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.INTEGRATIONS_APP_ID }}
+          private-key: ${{ secrets.INTEGRATIONS_APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
         with:
+          token: ${{ steps.generate-token.outputs.token }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -105,6 +114,8 @@ jobs:
         run: |
           git push origin HEAD:${GITHUB_REF#refs/heads/}
           git push origin ${{ steps.increment_tag.outputs.next_tag }}
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Publish to NPM
         run: npm publish --provenance --access public
