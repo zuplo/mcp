@@ -1,0 +1,118 @@
+name: Build and Release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Part of the semantic version number to increment. (major | minor | patch)"
+        required: true
+        default: minor
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  build-and-release:
+    name: Build, Tag, and Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build package
+        run: npm run build
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: echo "LATEST_TAG=$(git describe --abbrev=0 --tags 2>/dev/null || echo '')" >> $GITHUB_ENV
+
+      - name: Increment tag
+        id: increment_tag
+        shell: bash
+        run: |
+          set -e
+          BUMP=${{ inputs.bump }}
+          LAST_SEMVER=${LATEST_TAG#v}
+          if [[ ! "$LATEST_TAG" ]]; then
+            echo "No tag found. Using default SEMVER '0.1.0'."
+            LAST_SEMVER=0.1.0
+          fi
+          LAST_SEMVER_ELEMENTS=($(echo $LAST_SEMVER | tr "." " "))
+          MAJOR="${LAST_SEMVER_ELEMENTS[0]}"
+          MINOR="${LAST_SEMVER_ELEMENTS[1]}"
+          PATCH="${LAST_SEMVER_ELEMENTS[2]}"
+          case "$BUMP" in
+              "major")
+                  ((MAJOR+=1))
+                  MINOR=0
+                  PATCH=0
+              ;;
+              "minor")
+                  ((MINOR+=1))
+                  PATCH=0
+              ;;
+              "patch")
+                  ((PATCH+=1))
+              ;;
+          esac
+          NEXT_SEMVER="$MAJOR.$MINOR.$PATCH"
+          NEXT_TAG="v$NEXT_SEMVER"
+          echo "BUMP:        $BUMP"
+          echo "LAST SEMVER: $LAST_SEMVER"
+          echo "NEXT SEMVER: $NEXT_SEMVER"
+          echo "NEXT TAG:    $NEXT_TAG"
+          echo "next_tag=$NEXT_TAG" >> $GITHUB_OUTPUT
+          echo "next_semver=$NEXT_SEMVER" >> $GITHUB_OUTPUT
+
+      - name: Update package.json version
+        run: npm version ${{ steps.increment_tag.outputs.next_semver }} --no-git-tag-version
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Commit package.json changes
+        run: |
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.increment_tag.outputs.next_tag }}" || echo "No changes to commit"
+
+      - name: Create new tag
+        run: git tag ${{ steps.increment_tag.outputs.next_tag }}
+
+      - name: Push changes and tag
+        run: |
+          git push origin HEAD:${GITHUB_REF#refs/heads/}
+          git push origin ${{ steps.increment_tag.outputs.next_tag }}
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PUBLIC_NPM_REGISTRY_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.increment_tag.outputs.next_tag }}
+          generateReleaseNotes: true

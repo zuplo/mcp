@@ -1,5 +1,5 @@
-import { MCPServer } from "./index";
-import { JSONRPCRequest } from "../jsonrpc2/types";
+import type { JSONRPCRequest } from "../jsonrpc2/types.js";
+import { MCPServer } from "./index.js";
 
 describe("MCPServer", () => {
   describe("ping", () => {

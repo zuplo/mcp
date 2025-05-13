@@ -62,7 +62,21 @@
       "quoteStyle": "double",
       "attributePosition": "auto",
       "bracketSpacing": true
-    }
+    },
+    "globals": [
+      // Jest related globals utilized in tests
+      "after",
+      "afterAll",
+      "afterEach",
+      "before",
+      "beforeAll",
+      "beforeEach",
+      "describe",
+      "expect",
+      "fail",
+      "it",
+      "jest"
+    ]
   }
 }
 

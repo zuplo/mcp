@@ -1,7 +1,7 @@
-import { MCPServer } from "./index";
-import { JSONRPCRequest } from "../jsonrpc2/types";
-import { LATEST_PROTOCOL_VERSION } from "../mcp/versions";
-import { InitializeResult } from "../mcp/20250326/types/types";
+import type { JSONRPCRequest } from "../jsonrpc2/types.js";
+import type { InitializeResult } from "../mcp/20250326/types/types.js";
+import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
+import { MCPServer } from "./index.js";
 
 describe("MCPServer", () => {
   describe("initialize", () => {

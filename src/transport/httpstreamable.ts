@@ -210,7 +210,9 @@ export class HTTPStreamableTransport implements Transport {
     const method = request.method.toUpperCase();
 
     try {
-      // Validate origin for security
+      // Validate origin as recommended by protocol:
+      // "Servers MUST validate the Origin header on all incoming connections to
+      // prevent DNS rebinding attacks"
       this.validateOrigin(request);
 
       // Extract session ID if present
@@ -321,16 +323,17 @@ export class HTTPStreamableTransport implements Transport {
     const hasRequests = messageArray.some((msg) => this.isRequest(msg));
 
     // Handle session initialization
+    let currentSession = session;
     if (
       this.options.enableSessions &&
-      !session &&
+      !currentSession &&
       messageArray.some(
         (msg) => this.isRequest(msg) && msg.method === "initialize"
       )
     ) {
       // Create new session
       const sessionId = this.generateFallbackUUID();
-      session = this.createSession(sessionId);
+      currentSession = this.createSession(sessionId);
     }
 
     // Process messages
@@ -342,7 +345,9 @@ export class HTTPStreamableTransport implements Transport {
         }
         return new Response(null, {
           status: 202,
-          headers: session ? { "Mcp-Session-Id": session.id } : undefined,
+          headers: currentSession
+            ? { "Mcp-Session-Id": currentSession.id }
+            : undefined,
         });
       }
 
@@ -370,8 +375,8 @@ export class HTTPStreamableTransport implements Transport {
           "Content-Type": "application/json",
         };
 
-        if (session) {
-          headers["Mcp-Session-Id"] = session.id;
+        if (currentSession) {
+          headers["Mcp-Session-Id"] = currentSession.id;
         }
 
         return new Response(JSON.stringify(responseBody), {
@@ -381,7 +386,7 @@ export class HTTPStreamableTransport implements Transport {
       }
 
       // Otherwise, use SSE for more complex cases (the existing code)
-      const { stream, streamId } = this.createStream(session);
+      const { stream, streamId } = this.createStream(currentSession);
       const responsePromises: Promise<JSONRPCResponse | undefined>[] = [];
 
       for (const message of messageArray) {
@@ -406,8 +411,8 @@ export class HTTPStreamableTransport implements Transport {
         Connection: "keep-alive",
       };
 
-      if (session) {
-        headers["Mcp-Session-Id"] = session.id;
+      if (currentSession) {
+        headers["Mcp-Session-Id"] = currentSession.id;
       }
 
       // Let responses be handled by the message handler and sent to the stream
@@ -644,7 +649,8 @@ export class HTTPStreamableTransport implements Transport {
     setInterval(() => {
       const now = Date.now();
       for (const [sessionId, session] of this.sessions.entries()) {
-        if (now - session.lastActivity > this.options.timeout!) {
+        const timeout = this.options.timeout ?? 60000;
+        if (now - session.lastActivity > timeout) {
           // Close all streams
           for (const [streamId, streamInfo] of session.streams.entries()) {
             try {
@@ -694,8 +700,6 @@ export class HTTPStreamableTransport implements Transport {
   private validateOrigin(request: Request): void {
     const origin = request.headers.get("Origin");
 
-    // Simple check for demo purposes
-    // In production, you would implement a more robust validation
     if (origin && !this.isValidOrigin(origin)) {
       throw new Error("Invalid origin");
     }
