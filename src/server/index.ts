@@ -7,22 +7,22 @@ import type {
   JSONRPCRequest,
   JSONRPCResponse,
 } from "../jsonrpc2/types.js";
-import { CallToolRequestSchema } from "../mcp/20250326/types/schemas/tools.schema.js";
-import type {
-  ServerCapabilities,
-  Tool,
-  CallToolResult,
-  InitializeResult,
-  ListToolsResult,
-} from "../mcp/20250326/types/types.js";
-import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
-import { Transport } from "../transport/types.js";
 import {
   isJSONRPCNotification,
   isJSONRPCRequest,
   isJSONRPCResponse,
 } from "../jsonrpc2/validation.js";
+import { CallToolRequestSchema } from "../mcp/20250326/types/schemas/tools.schema.js";
+import type {
+  CallToolResult,
+  InitializeResult,
+  ListToolsResult,
+  ServerCapabilities,
+  Tool,
+} from "../mcp/20250326/types/types.js";
 import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
+import type { Transport } from "../transport/types.js";
+import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
 
 export class MCPServer {
   private capabilities: ServerCapabilities;

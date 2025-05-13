@@ -1,6 +1,5 @@
-import { HTTPStreamableTransport } from "./httpstreamable.js";
 import { MCPServer } from "../server/index.js";
-import { jest } from "@jest/globals";
+import { HTTPStreamableTransport } from "./httpstreamable.js";
 
 describe("HTTPStreamableTransport Accept header validation", () => {
   let server: MCPServer;
@@ -11,9 +10,6 @@ describe("HTTPStreamableTransport Accept header validation", () => {
     transport = new HTTPStreamableTransport();
     transport.connect();
     server.withTransport(transport);
-
-    // Mock methods we're not testing
-    (transport as any).validateOrigin = jest.fn();
   });
 
   // Helper function to create requests with different Accept headers
@@ -23,7 +19,7 @@ describe("HTTPStreamableTransport Accept header validation", () => {
     };
 
     if (acceptHeader !== undefined) {
-      headers["Accept"] = acceptHeader;
+      headers.Accept = acceptHeader;
     }
 
     return new Request("http://example.com/mcp", {
