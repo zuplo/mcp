@@ -21,6 +21,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
 
     steps:
       # Must create the token first as the checkout step needs to use this token
