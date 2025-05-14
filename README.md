@@ -48,7 +48,12 @@ const server = new MCPServer({
 server.addTool({
   name: "add",
   description: "Adds two numbers together and returns the result.",
-  schema: z.object({ a: z.number(), b: z.number() }),
+  validator: new ZodValidator(
+    z.object({
+      a: z.number().describe("First number"),
+      b: z.number().describe("Second number")
+    })
+  ),
   handler: async ({ a, b }) => ({
     content: [{ type: "text", text: String(a + b) }],
     isError: false,

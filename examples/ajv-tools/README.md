@@ -1,7 +1,10 @@
-# Calculator server
+# Custom Ajv validator
 
-This calculator has a few mathematical tools (like addition, division, sqrt, modulo, etc.)
-and can be utilized by an MCP client to run calculations remotely.
+This demonstrates using Ajv with the `CustomValidator` to in an advanced use case to:
+
+1. Build a custom schema validator function based on a concrete type / schema using `ajv.compile`
+2. Build a hand rolled, "bring your own validator" with `CustomValidator<T>`
+3. Provide the custom validator when bootstrapping a tool
 
 ## 🏃 Build & run the server
 

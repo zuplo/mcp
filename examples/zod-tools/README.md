@@ -1,7 +1,6 @@
-# Calculator server
+# Echo server with Zod validator
 
-This calculator has a few mathematical tools (like addition, division, sqrt, modulo, etc.)
-and can be utilized by an MCP client to run calculations remotely.
+This implements a simple echo tool using the `ZodValidator` for schema validation.
 
 ## 🏃 Build & run the server
 
@@ -28,10 +27,9 @@ curl -X POST \
   -d '{
     method: "tools/call"
     params:{
-      name: "add"
+      name: "echo"
       arguments:{
-        a: 1
-        b: 2
+        input: "hello"
       }
     }
   }' \
