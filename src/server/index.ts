@@ -1,5 +1,3 @@
-import { type ZodSchema, z } from "zod";
-import zodToJsonSchema from "zod-to-json-schema";
 import type {
   JSONRPCError,
   JSONRPCMessage,
@@ -21,8 +19,13 @@ import type {
   Tool,
 } from "../mcp/20250326/types/types.js";
 import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
+import type { ToolConfig } from "../tools/types.js";
 import type { Transport } from "../transport/types.js";
-import type { MCPServerOptions, RegisteredTool, ToolConfig } from "./types.js";
+import type {
+  InputParamValidator,
+  MCPServerOptions,
+  RegisteredTool,
+} from "./types.js";
 
 export class MCPServer {
   private capabilities: ServerCapabilities;
@@ -105,33 +108,30 @@ export class MCPServer {
    * Register a tool
    */
   public addTool<
-    S extends ZodSchema = ZodSchema,
+    V extends InputParamValidator<unknown>,
     R extends CallToolResult = CallToolResult,
-  >(config: ToolConfig<S, R>): void {
+  >(config: ToolConfig<V, R>): void {
     const {
       name,
-      schema,
+      validator,
       handler,
       description = `Execute the ${name} tool`,
     } = config;
 
-    // Create tool schema from zod schema
     const toolSchema: Tool = {
       name,
       description,
-      inputSchema: zodToJsonSchema(schema) as Tool["inputSchema"],
+      inputSchema: validator.jsonSchema as Tool["inputSchema"],
     };
 
-    const registeredTool: RegisteredTool = {
-      toolSchema: toolSchema,
-      inputSchema: schema,
+    const registered: RegisteredTool = {
+      tool: toolSchema,
+      validator,
       handler,
     };
 
-    this.tools.set(name, registeredTool);
+    this.tools.set(name, registered);
     this.updateAvailableTools();
-
-    return;
   }
 
   /**
@@ -151,7 +151,7 @@ export class MCPServer {
    * Get all registered tools
    */
   public getToolDefinitions(): Tool[] {
-    return Array.from(this.tools.values()).map((tool) => tool.toolSchema);
+    return Array.from(this.tools.values()).map((tool) => tool.tool);
   }
 
   /**
@@ -244,7 +244,7 @@ export class MCPServer {
     const toolsArray = Array.from(this.tools.entries()).map(
       ([name, registeredTool]) => {
         // Extract the toolSchema which already has the correct structure
-        return registeredTool.toolSchema;
+        return registeredTool.tool;
       }
     );
 
@@ -293,30 +293,26 @@ export class MCPServer {
       };
     }
 
-    // Validate parameters if schema is available
-    const params = toolCallReq.params.arguments || {};
-    let validatedParams = z.object({});
-
-    if (tool.inputSchema) {
-      const parsed = tool.inputSchema.safeParse(params);
-      if (!parsed.success) {
-        return {
-          jsonrpc: "2.0",
-          id: request.id,
-          error: {
-            code: -32602,
-            message: "Invalid params",
-            data: parsed.error,
-          },
-        };
-      }
-
-      validatedParams = parsed.data;
+    const rawArgs = toolCallReq.params.arguments ?? {};
+    const validation = tool.validator.parse(rawArgs);
+    if (!validation.success) {
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32602,
+          message: "Invalid params",
+          data: validation.error,
+        },
+      };
     }
 
     // Execute the tool
     try {
-      const result = await tool.handler(validatedParams);
+      // upcast here since we are sure that the json schema object has been
+      // validated and "data" should be some sort of object.
+      const data = validation.data as object;
+      const result = await tool.handler(data);
 
       return {
         jsonrpc: "2.0",

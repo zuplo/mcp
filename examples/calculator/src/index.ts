@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 import { MCPServer } from "@zuplo/mcp/server";
 import { HTTPStreamableTransport } from "@zuplo/mcp/transport/httpstreamable";
 import { z } from 'zod';
+import { ZodValidator } from '@zuplo/mcp/tools/zod';
 
 // Hono app for routing and handling fetch API Request / Response
 const app = new Hono();
@@ -17,10 +18,12 @@ const server = new MCPServer({
 server.addTool({
   name: "add",
   description: "Adds two numbers together and returns the result.",
-  schema: z.object({
-    a: z.number().describe("First number"),
-    b: z.number().describe("Second number")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      a: z.number().describe("First number"),
+      b: z.number().describe("Second number")
+    })
+  ),
   handler: async ({ a, b }) => ({
     content: [{ type: "text", text: String(a + b) }],
     isError: false,
@@ -31,10 +34,12 @@ server.addTool({
 server.addTool({
   name: "subtract",
   description: "Subtracts the second number from the first and returns the result.",
-  schema: z.object({
-    a: z.number().describe("Number to subtract from"),
-    b: z.number().describe("Number to subtract")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      a: z.number().describe("Number to subtract from"),
+      b: z.number().describe("Number to subtract")
+    })
+  ),
   handler: async ({ a, b }) => ({
     content: [{ type: "text", text: String(a - b) }],
     isError: false,
@@ -45,10 +50,12 @@ server.addTool({
 server.addTool({
   name: "multiply",
   description: "Multiplies two numbers together and returns the result.",
-  schema: z.object({
-    a: z.number().describe("First number"),
-    b: z.number().describe("Second number")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      a: z.number().describe("First number"),
+      b: z.number().describe("Second number")
+    })
+  ),
   handler: async ({ a, b }) => ({
     content: [{ type: "text", text: String(a * b) }],
     isError: false,
@@ -59,14 +66,16 @@ server.addTool({
 server.addTool({
   name: "divide",
   description: "Divides the first number by the second and returns the result.",
-  schema: z.object({
-    a: z.number().describe("Dividend (number to be divided)"),
-    b: z.number()
-      .refine(val => val !== 0, {
-        message: "Cannot divide by zero"
-      })
-      .describe("Divisor (number to divide by)")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      a: z.number().describe("Dividend (number to be divided)"),
+      b: z.number()
+        .refine(val => val !== 0, {
+          message: "Cannot divide by zero"
+        })
+        .describe("Divisor (number to divide by)")
+    })
+  ),
   handler: async ({ a, b }) => {
     if (b === 0) {
       return {
@@ -85,10 +94,12 @@ server.addTool({
 server.addTool({
   name: "power",
   description: "Raises the first number to the power of the second number.",
-  schema: z.object({
-    base: z.number().describe("The base number"),
-    exponent: z.number().describe("The exponent")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      base: z.number().describe("The base number"),
+      exponent: z.number().describe("The exponent")
+    })
+  ),
   handler: async ({ base, exponent }) => ({
     content: [{ type: "text", text: String(Math.pow(base, exponent)) }],
     isError: false,
@@ -99,11 +110,13 @@ server.addTool({
 server.addTool({
   name: "sqrt",
   description: "Calculates the square root of the given number.",
-  schema: z.object({
-    number: z.number()
-      .min(0, { message: "Cannot calculate square root of negative numbers" })
-      .describe("The number to calculate the square root of")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      number: z.number()
+        .min(0, { message: "Cannot calculate square root of negative numbers" })
+        .describe("The number to calculate the square root of")
+    })
+  ),
   handler: async ({ number }) => {
     if (number < 0) {
       return {
@@ -122,14 +135,16 @@ server.addTool({
 server.addTool({
   name: "modulo",
   description: "Returns the remainder of dividing the first number by the second.",
-  schema: z.object({
-    a: z.number().describe("Dividend"),
-    b: z.number()
-      .refine(val => val !== 0, {
-        message: "Modulo by zero is not allowed"
-      })
-      .describe("Divisor")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      a: z.number().describe("Dividend"),
+      b: z.number()
+        .refine(val => val !== 0, {
+          message: "Modulo by zero is not allowed"
+        })
+        .describe("Divisor")
+    })
+  ),
   handler: async ({ a, b }) => {
     if (b === 0) {
       return {
@@ -148,13 +163,15 @@ server.addTool({
 server.addTool({
   name: "factorial",
   description: "Calculates the factorial of the given integer.",
-  schema: z.object({
-    number: z.number()
-      .int()
-      .min(0, { message: "Factorial is only defined for non-negative integers" })
-      .max(170, { message: "Number too large, would cause overflow" })
-      .describe("The non-negative integer to calculate factorial for")
-  }),
+  validator: new ZodValidator(
+    z.object({
+      number: z.number()
+        .int()
+        .min(0, { message: "Factorial is only defined for non-negative integers" })
+        .max(170, { message: "Number too large, would cause overflow" })
+        .describe("The non-negative integer to calculate factorial for")
+    })
+  ),
   handler: async ({ number }) => {
     if (number < 0 || !Number.isInteger(number)) {
       return {

@@ -33,6 +33,14 @@
     "./transport/httpstreamable": {
       "types": "./dist/transport/httpstreamable.d.ts",
       "import": "./dist/transport/httpstreamable.js"
+    },
+    "./tools/zod": {
+      "types": "./dist/tools/zod.d.ts",
+      "import": "./dist/tools/zod.js"
+    },
+    "./tools/custom": {
+      "types": "./dist/tools/custom.d.ts",
+      "import": "./dist/tools/custom.js"
     }
   },
   "repository": {

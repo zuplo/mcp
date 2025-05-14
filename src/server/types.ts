@@ -6,37 +6,62 @@ import type {
 } from "../mcp/20250326/types/types.js";
 
 /**
- * Handler function for tool execution
+ * InputParamValidatorReturn is the return type for the @type InputParamValidator
+ *
+ * @param T - the type expected in "data" on successful validation. Otherwise,
+ * a string error is returned that is passed back through the protocol.
  */
-export type ToolHandler<
-  S extends ZodSchema = ZodSchema,
-  R extends CallToolResult = CallToolResult,
-> = (params: z.infer<S>) => Promise<R> | R;
-
-/**
- * Configuration for registering a tool
- */
-export interface ToolConfig<
-  S extends ZodSchema = ZodSchema,
-  R extends CallToolResult = CallToolResult,
-> {
-  name: string;
-  schema: S;
-  handler: ToolHandler<S, R>;
-  description?: string;
+export interface InputParamValidatorReturn<T> {
+  success: boolean;
+  data: T | null;
+  error: string | null;
 }
 
 /**
- * Internal storage type for registered tools
+ * InputParamValidator is a runtime validator that an MCPServer uses to validate
+ * a tool calls input params. This interface is implemented by validators
+ * (like the Zod validator) which can be provided as pluggable systems for
+ * checking a tools input params match an expected schema object.
+ *
+ * @param T - the type expected to be returned by "parse" in the validated
+ * return data in @type InputParamValidatorReturn
  */
-export type RegisteredTool = {
-  toolSchema: Tool;
-  inputSchema: ZodSchema;
-  handler: (params: unknown) => Promise<CallToolResult> | CallToolResult;
+export interface InputParamValidator<T> {
+  /**
+   * The raw JSON-Schema used for JSONRPC messaging and metadata.)
+   */
+  jsonSchema: object;
+
+  /**
+   * The function provided by an implementor that is used during tool calls
+   */
+  parse(input: unknown): InputParamValidatorReturn<T>;
+}
+
+/**
+ * ParsedData is the non-null "data" from a @type InputParamvalidatorReturn
+ * as it's returned by a validator: this ensures type safety in a tool's
+ * handler
+ */
+export type ParsedData<V extends InputParamValidator<unknown>> = NonNullable<
+  ReturnType<V["parse"]>["data"]
+>;
+
+/**
+ * Internal MCP server storage object for a registered tool
+ *
+ * @param V - is a @type InputParamValidator
+ */
+export type RegisteredTool<
+  V extends InputParamValidator<unknown> = InputParamValidator<unknown>,
+> = {
+  tool: Tool;
+  validator: V;
+  handler: (params: ParsedData<V>) => Promise<CallToolResult> | CallToolResult;
 };
 
 /**
- * Server options for configuration
+ * MCP Server configuration options
  */
 export interface MCPServerOptions {
   /**
