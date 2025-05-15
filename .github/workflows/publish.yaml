@@ -9,13 +9,20 @@ jobs:
     timeout-minutes: 10
 
     permissions:
-      contents: read
       packages: write
+      id-token: write
 
     steps:
+    - name: Generate a token
+      id: generate-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.INTEGRATIONS_APP_ID }}
+        private-key: ${{ secrets.INTEGRATIONS_APP_PRIVATE_KEY }}
+
     - uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.release.tag_name }}
+        token: ${{ steps.generate-token.outputs.token }}
         fetch-depth: 0
 
     - uses: actions/setup-node@v4
@@ -28,9 +35,9 @@ jobs:
     - name: Publish to NPM
       env:
         NODE_AUTH_TOKEN: ${{ secrets.PUBLIC_NPM_REGISTRY_TOKEN }}
-      run: npm publish --access public
+      run: npm publish --access public --registry https://registry.npmjs.org
 
     - name: Publish to GitHub Packages
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm publish --registry https://npm.pkg.github.com
+        NODE_AUTH_TOKEN: ${{ steps.generate-token.outputs.token }}
+      run: npm publish --access public --registry https://npm.pkg.github.com
