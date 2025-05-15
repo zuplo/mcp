@@ -44,13 +44,13 @@ jobs:
     - run: npm run build
 
     - name: Get latest tag
-      id: latest
+      id: latest_tag
       run: echo "tag=$(git describe --abbrev=0 --tags 2>/dev/null || echo '')" >> "$GITHUB_OUTPUT"
 
     - name: Bump semver tag
       id: bump_tag
       env:
-        LATEST_TAG: ${{ steps.latest.outputs.tag }}
+        LATEST_TAG: ${{ steps.latest_tag.outputs.tag }}
         BUMP: ${{ inputs.bump }}
       run: |
         set -e
@@ -70,7 +70,7 @@ jobs:
         echo "next_tag=v$next" >> "$GITHUB_OUTPUT"
 
     # Updates package.json (but with no tag yet as it's not been committed)
-    - run: npm version ${{ steps.bump.outputs.next_version }} --no-git-tag-version
+    - run: npm version ${{ steps.bump_tag.outputs.next_version }} --no-git-tag-version
 
     # 6. Commit + tag
     - name: Commit & tag
@@ -79,17 +79,17 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git add package.json
         git add package-lock.json
-        git commit -m "chore: bump version to ${{ steps.bump.outputs.next_tag }}" || echo "nothing to commit"
-        git tag ${{ steps.bump.outputs.next_tag }}
+        git commit -m "chore: bump version to ${{ steps.bump_tag.outputs.next_tag }}" || echo "nothing to commit"
+        git tag ${{ steps.bump_tag.outputs.next_tag }}
 
     - run: |
         git push origin HEAD:${GITHUB_REF#refs/heads/}
-        git push origin ${{ steps.bump.outputs.next_tag }}
+        git push origin ${{ steps.bump_tag.outputs.next_tag }}
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
     - name: Create GitHub release
       uses: ncipollo/release-action@v1
       with:
-        tag: ${{ steps.bump.outputs.next_tag }}
+        tag: ${{ steps.bump_tag.outputs.next_tag }}
         generateReleaseNotes: true
