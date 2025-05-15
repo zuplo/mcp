@@ -29,15 +29,18 @@ jobs:
       with:
         node-version: 22.x
         cache: npm
+        registry-url: https://registry.npmjs.org
 
     - run: npm ci
 
     - name: Publish to NPM
       env:
         NODE_AUTH_TOKEN: ${{ secrets.PUBLIC_NPM_REGISTRY_TOKEN }}
-      run: npm publish --access public --registry https://registry.npmjs.org
+      run: npm publish --access public
 
     - name: Publish to GitHub Packages
       env:
         NODE_AUTH_TOKEN: ${{ steps.generate-token.outputs.token }}
-      run: npm publish --access public --registry https://npm.pkg.github.com
+      run: |
+        npm config set //npm.pkg.github.com/:_authToken "$NODE_AUTH_TOKEN"
+        npm publish --registry https://npm.pkg.github.com
