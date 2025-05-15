@@ -93,3 +93,8 @@ jobs:
       with:
         tag: ${{ steps.bump_tag.outputs.next_tag }}
         generateReleaseNotes: true
+        # Because workflows cannot be triggered from other workflows using the
+        # default "GITHUB_TOKEN", we need the elevated token from the installed
+        # GitHub App. See more:
+        # https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+        token: ${{ steps.app-token.outputs.token }}
