@@ -1,0 +1,95 @@
+name: Cut Release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Part of the semantic version number to increment (major | minor | patch)"
+        type: choice
+        default: minor
+        required: true
+        options: [major, minor, patch]
+
+jobs:
+  release:
+    name: Build, tag & create a new release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+    steps:
+    - name: Generate token
+      id: app-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.INTEGRATIONS_APP_ID }}
+        private-key: ${{ secrets.INTEGRATIONS_APP_PRIVATE_KEY }}
+
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ steps.app-token.outputs.token }}
+        fetch-depth: 0
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: npm
+
+    # Run install, test, and builds for sanity check.
+    - run: npm ci
+    - run: npm test
+    - run: npm run build
+
+    - name: Get latest tag
+      id: latest
+      run: echo "tag=$(git describe --abbrev=0 --tags 2>/dev/null || echo '')" >> "$GITHUB_OUTPUT"
+
+    - name: Bump semver tag
+      id: bump_tag
+      env:
+        LATEST_TAG: ${{ steps.latest.outputs.tag }}
+        BUMP: ${{ inputs.bump }}
+      run: |
+        set -e
+        base=${LATEST_TAG#v}
+        if [[ -z "$base" ]]; then
+          echo "No tag found. Exiting."
+          exit 1
+        fi
+        IFS=. read -r maj min pat <<< "$base"
+        case "$BUMP" in
+          major) ((maj++)); min=0; pat=0 ;;
+          minor) ((min++)); pat=0 ;;
+          patch) ((pat++)) ;;
+        esac
+        next="$maj.$min.$pat"
+        echo "next_version=$next" >> "$GITHUB_OUTPUT"
+        echo "next_tag=v$next" >> "$GITHUB_OUTPUT"
+
+    # Updates package.json (but with no tag yet as it's not been committed)
+    - run: npm version ${{ steps.bump.outputs.next_version }} --no-git-tag-version
+
+    # 6. Commit + tag
+    - name: Commit & tag
+      run: |
+        git config --local user.name  "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git add package.json
+        git add package-lock.json
+        git commit -m "chore: bump version to ${{ steps.bump.outputs.next_tag }}" || echo "nothing to commit"
+        git tag ${{ steps.bump.outputs.next_tag }}
+
+    - run: |
+        git push origin HEAD:${GITHUB_REF#refs/heads/}
+        git push origin ${{ steps.bump.outputs.next_tag }}
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+    - name: Create GitHub release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ steps.bump.outputs.next_tag }}
+        generateReleaseNotes: true
