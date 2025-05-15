@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 10
 
     permissions:
-      content: read
+      contents: read
       packages: write
       id-token: write
 
