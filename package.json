@@ -26,6 +26,10 @@
       "types": "./dist/jsonrpc2/validation.d.ts",
       "import": "./dist/jsonrpc2/validation.js"
     },
+    "./logger": {
+      "types": "./dist/logger/index.d.ts",
+      "import": "./dist/logger/index.js"
+    },
     "./server": {
       "types": "./dist/server/index.d.ts",
       "import": "./dist/server/index.js"

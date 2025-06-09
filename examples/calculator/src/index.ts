@@ -2,16 +2,21 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono';
 import { MCPServer } from "@zuplo/mcp/server";
 import { HTTPStreamableTransport } from "@zuplo/mcp/transport/httpstreamable";
+import { ConsoleLogger } from "@zuplo/mcp/logger";
 import { z } from 'zod';
 import { ZodValidator } from '@zuplo/mcp/tools/zod';
 
 // Hono app for routing and handling fetch API Request / Response
 const app = new Hono();
 
+// Create a logger instance
+const logger = new ConsoleLogger();
+
 // MCP server
 const server = new MCPServer({
   name: "Calculator",
   version: "0.0.0",
+  logger,
 });
 
 // addition
@@ -193,7 +198,7 @@ server.addTool({
 });
 
 // HTTP Streamable Transport
-const transport = new HTTPStreamableTransport();
+const transport = new HTTPStreamableTransport({ logger });
 await transport.connect();
 server.withTransport(transport);
 
@@ -203,7 +208,7 @@ app.post('/mcp', async (c) => {
     const request = c.req.raw;
     return transport.handleRequest(request);
   } catch (error) {
-    console.error('Error handling MCP request:', error);
+    logger.error('Error handling MCP request:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -211,7 +216,7 @@ app.post('/mcp', async (c) => {
   }
 });
 
-console.log("serving on port 3000")
+logger.info("Calculator MCP server starting on port 3000");
 serve({
   fetch: app.fetch,
   port: 3000
