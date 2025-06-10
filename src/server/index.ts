@@ -10,6 +10,8 @@ import {
   isJSONRPCRequest,
   isJSONRPCResponse,
 } from "../jsonrpc2/validation.js";
+import { createDefaultLogger } from "../logger/index.js";
+import type { Logger } from "../logger/types.js";
 import { CallToolRequestSchema } from "../mcp/20250326/types/schemas/tools.schema.js";
 import type {
   CallToolResult,
@@ -33,11 +35,13 @@ export class MCPServer {
   private name: string;
   private version: string;
   private instructions: string | undefined;
+  private logger: Logger;
 
   constructor(options: MCPServerOptions) {
     this.name = options.name || "MCP Server";
     this.version = options.version || "1.0.0";
     this.instructions = options.instructions || undefined;
+    this.logger = options.logger || createDefaultLogger();
 
     // Set default capabilities
     this.capabilities = {
@@ -62,11 +66,11 @@ export class MCPServer {
           await this.handleNotification(message);
           return null;
         } else if (isJSONRPCResponse(message)) {
-          console.log("Received response:", message);
+          this.logger.debug("Received response:", message);
           return null;
         }
       } catch (error) {
-        console.error("Error processing message:", error);
+        this.logger.error("Error processing message:", error);
 
         // Send error response for requests
         if (isJSONRPCRequest(message)) {
@@ -182,7 +186,7 @@ export class MCPServer {
           };
       }
     } catch (error) {
-      console.error("Error handling request:", error);
+      this.logger.error("Error handling request:", error);
 
       // Internal error
       return {
@@ -202,7 +206,7 @@ export class MCPServer {
   public async handleNotification(
     notification: JSONRPCNotification
   ): Promise<void> {
-    console.log("received notification", notification.method);
+    this.logger.debug("Received notification:", notification.method);
   }
 
   /**
@@ -267,7 +271,10 @@ export class MCPServer {
   ): Promise<JSONRPCResponse | JSONRPCError> {
     const validatedToolCall = CallToolRequestSchema.safeParse(request);
     if (!validatedToolCall.success) {
-      console.log("could not validate tool call with calltoolrequestschema");
+      this.logger.warn(
+        "Could not validate tool call:",
+        validatedToolCall.error
+      );
       return {
         jsonrpc: "2.0",
         id: request.id,
@@ -320,7 +327,7 @@ export class MCPServer {
         result: result,
       };
     } catch (error) {
-      console.error(`Error executing tool "${toolName}":`, error);
+      this.logger.error(`Error executing tool "${toolName}":`, error);
 
       return {
         jsonrpc: "2.0",

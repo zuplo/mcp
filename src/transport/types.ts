@@ -1,4 +1,5 @@
 import type { JSONRPCMessage } from "../jsonrpc2/types.js";
+import type { Logger } from "../logger/types.js";
 
 /**
  * MessageHandler is a JSON RPC handler for processing messages on the transport
@@ -15,6 +16,7 @@ export interface TransportOptions {
   headers?: Record<string, string>;
   enableSessions?: boolean;
   fetch?: typeof fetch;
+  logger?: Logger;
 }
 
 /**

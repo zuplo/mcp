@@ -4,6 +4,8 @@ import type {
   JSONRPCResponse,
 } from "../jsonrpc2/types.ts";
 import { isJSONRPCRequest, isJSONRPCResponse } from "../jsonrpc2/validation.js";
+import { createDefaultLogger } from "../logger/index.js";
+import type { Logger } from "../logger/types.js";
 import type { MessageHandler, Transport, TransportOptions } from "./types.js";
 
 /**
@@ -49,6 +51,7 @@ export class HTTPStreamableTransport implements Transport {
   private enableStreaming = false;
   private sessions: Map<string, Session> = new Map();
   private streams: Map<string, StreamInfo> = new Map();
+  private logger: Logger;
 
   constructor(options: TransportOptions = {}, streamable = false) {
     // Set defaults
@@ -57,6 +60,7 @@ export class HTTPStreamableTransport implements Transport {
       enableSessions: false,
       ...options,
     };
+    this.logger = options.logger || createDefaultLogger();
 
     // Start session cleanup timer if sessions are enabled
     if (streamable) {
@@ -154,7 +158,7 @@ export class HTTPStreamableTransport implements Transport {
         try {
           await streamInfo.writer.close();
         } catch (error) {
-          console.warn("Error closing stream:", error);
+          this.logger.warn("Error closing stream:", error);
         }
       }
       session.streams.clear();
@@ -244,7 +248,7 @@ export class HTTPStreamableTransport implements Transport {
           });
       }
     } catch (error) {
-      console.error("Error handling request:", error);
+      this.logger.error("Error handling request:", error);
 
       // Determine appropriate status code
       const status = 400;
@@ -541,7 +545,7 @@ export class HTTPStreamableTransport implements Transport {
       const event = `id: ${eventId}\ndata: ${eventData}\n\n`;
       await streamInfo.writer.write(new TextEncoder().encode(event));
     } catch (error) {
-      console.warn("Error sending to stream:", error);
+      this.logger.warn("Error sending to stream:", error);
       // Stream might be closed, but we don't throw to avoid breaking the send loop
     }
   }
@@ -562,7 +566,7 @@ export class HTTPStreamableTransport implements Transport {
     try {
       await streamInfo.writer.close();
     } catch (error) {
-      console.warn("Error closing stream:", error);
+      this.logger.warn("Error closing stream:", error);
     }
 
     session.streams.delete(streamId);
@@ -656,9 +660,9 @@ export class HTTPStreamableTransport implements Transport {
             try {
               streamInfo.writer
                 .close()
-                .catch((e) => console.warn("Error closing stream:", e));
+                .catch((e) => this.logger.warn("Error closing stream:", e));
             } catch (error) {
-              console.warn("Error closing stream:", error);
+              this.logger.warn("Error closing stream:", error);
             }
             this.streams.delete(streamId);
           }

@@ -1,4 +1,5 @@
 import type { ZodSchema, z } from "zod";
+import type { Logger } from "../logger/types.js";
 import type {
   CallToolResult,
   ServerCapabilities,
@@ -83,4 +84,10 @@ export interface MCPServerOptions {
    * Custom, optional instructions to provide to the client during initialization
    */
   instructions?: string;
+
+  /**
+   * Logger instance for handling log messages
+   * If not provided, a default logger will be used
+   */
+  logger?: Logger;
 }
