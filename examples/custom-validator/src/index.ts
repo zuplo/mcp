@@ -2,8 +2,9 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono';
 import { MCPServer } from "@zuplo/mcp/server";
 import { HTTPStreamableTransport } from "@zuplo/mcp/transport/httpstreamable";
-import { JSONSchemaType } from 'ajv';
-import { AjvValidator } from '@zuplo/mcp/tools/ajv';
+import Ajv, { AnySchemaObject, JSONSchemaType } from 'ajv';
+import { CustomValidator } from '@zuplo/mcp/tools/custom';
+import { FromSchema } from "json-schema-to-ts";
 
 // Hono app for routing and handling fetch API Request / Response
 const app = new Hono();
@@ -13,6 +14,8 @@ const server = new MCPServer({
   name: "Calculator",
   version: "0.0.0",
 });
+
+const ajv = new Ajv();
 
 type NumberPair = { a: number; b: number };
 
@@ -26,12 +29,26 @@ const numberPairSchema: JSONSchemaType<NumberPair> = {
   additionalProperties: false,
 };
 
+// Infers the object type and schema from the validation function
+const validateFn = ajv.compile(numberPairSchema);
+
+console.log(validateFn.schema)
+
+const numberPairValidator = new CustomValidator<any>(
+  validateFn.schema as AnySchemaObject,
+  (input) => {
+    if (validateFn(input)) {
+      return { success: true, data: input, error: null }
+    };
+
+    return { success: false, data: null, error: ajv.errorsText(validateFn.errors) }
+  }
+);
+
 server.addTool({
   name: "add",
   description: "Adds two numbers together",
-  validator: new AjvValidator<NumberPair>(
-    numberPairSchema
-  ),
+  validator: numberPairValidator,
   handler: async ({ a, b }) => ({
     content: [{ type: "text", text: String(a + b) }],
     isError: false,
