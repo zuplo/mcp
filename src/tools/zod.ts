@@ -17,15 +17,15 @@ export class ZodValidator<S extends AnyZodObject>
   implements InputParamValidator<z.infer<S>>
 {
   readonly jsonSchema: object;
-  readonly schema: S;
+  readonly zodSchema: S;
 
   constructor(schema: S) {
     this.jsonSchema = zodToJsonSchema(schema);
-    this.schema = schema;
+    this.zodSchema = schema;
   }
 
   parse(input: unknown): InputParamValidatorReturn<z.infer<S>> {
-    const parsed = this.schema.safeParse(input);
+    const parsed = this.zodSchema.safeParse(input);
     return parsed.success
       ? { success: true, data: parsed.data, error: null }
       : { success: false, data: null, error: parsed.error.message };
