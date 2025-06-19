@@ -1,4 +1,4 @@
-import type { CallToolResult } from "../mcp/20250326/types/types.js";
+import type { CallToolResult } from "../mcp/20250618/types/types.js";
 import type { InputParamValidator, ParsedData } from "../server/types.js";
 
 /**
