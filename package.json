@@ -6,10 +6,10 @@
   "scripts": {
     "build": "tsc",
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest",
-    "lint": "npx @biomejs/biome check src/",
-    "lint:fix": "npx @biomejs/biome check src/ --fix",
-    "lint:fix-unsafe": "npx @biomejs/biome check src/ --fix --unsafe",
-    "format": "npx @biomejs/biome format src/ --write"
+    "lint": "npx @biomejs/biome@1.9.4 check src/",
+    "lint:fix": "npx @biomejs/biome@1.9.4 check src/ --fix",
+    "lint:fix-unsafe": "npx @biomejs/biome@1.9.4 check src/ --fix --unsafe",
+    "format": "npx @biomejs/biome@1.9.4 format src/ --write"
   },
   "files": [
     "dist/**/**",

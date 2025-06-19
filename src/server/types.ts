@@ -1,10 +1,9 @@
-import type { ZodSchema, z } from "zod";
 import type { Logger } from "../logger/types.js";
 import type {
   CallToolResult,
   ServerCapabilities,
   Tool,
-} from "../mcp/20250326/types/types.js";
+} from "../mcp/20250618/types/types.js";
 
 /**
  * InputParamValidatorReturn is the return type for the @type InputParamValidator

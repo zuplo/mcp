@@ -12,15 +12,22 @@ import {
 } from "../jsonrpc2/validation.js";
 import { createDefaultLogger } from "../logger/index.js";
 import type { Logger } from "../logger/types.js";
-import { CallToolRequestSchema } from "../mcp/20250326/types/schemas/tools.schema.js";
+import { InitializeRequestSchema } from "../mcp/20250618/types/schemas/initialize.schema.js";
+import { CallToolRequestSchema } from "../mcp/20250618/types/schemas/tools.schema.js";
 import type {
   CallToolResult,
   InitializeResult,
   ListToolsResult,
   ServerCapabilities,
   Tool,
-} from "../mcp/20250326/types/types.js";
-import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
+} from "../mcp/20250618/types/types.js";
+import {
+  LATEST_PROTOCOL_VERSION,
+  PROTOCOL_VERSION_2024_10_07,
+  PROTOCOL_VERSION_2024_11_05,
+  PROTOCOL_VERSION_2025_03_26,
+  SUPPORTED_PROTOCOL_VERSIONS,
+} from "../mcp/versions.js";
 import type { ToolConfig } from "../tools/types.js";
 import type { Transport } from "../transport/types.js";
 import type {
@@ -223,22 +230,76 @@ export class MCPServer {
   /**
    * Handle initialize request
    */
-  private handleInitialize(request: JSONRPCRequest): JSONRPCResponse {
-    const initResponse: InitializeResult = {
-      protocolVersion: LATEST_PROTOCOL_VERSION,
-      capabilities: this.getCapabilities(),
-      serverInfo: {
-        name: this.name,
-        version: this.version,
-      },
-      ...(this.instructions ? { instructions: this.instructions } : {}),
-    };
+  private handleInitialize(
+    request: JSONRPCRequest
+  ): JSONRPCResponse | JSONRPCError {
+    const parseResult = InitializeRequestSchema.safeParse(request);
 
-    return {
-      jsonrpc: "2.0",
-      id: request.id,
-      result: initResponse,
-    };
+    if (!parseResult.success) {
+      // Extract the specific error
+      const errors = parseResult.error.format();
+
+      // Check if protocolVersion is missing
+      if (errors.params?.protocolVersion?._errors?.length) {
+        return {
+          jsonrpc: "2.0",
+          id: request.id,
+          error: {
+            code: -32602,
+            message: "Missing required parameter: protocolVersion",
+          },
+        };
+      }
+
+      // Other validation errors
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32602,
+          message: "Invalid request parameters",
+          data: parseResult.error.errors,
+        },
+      };
+    }
+
+    const protocolVersion = parseResult.data.params.protocolVersion;
+
+    switch (protocolVersion) {
+      case LATEST_PROTOCOL_VERSION:
+      case PROTOCOL_VERSION_2025_03_26:
+      case PROTOCOL_VERSION_2024_11_05:
+      case PROTOCOL_VERSION_2024_10_07: {
+        const initResponse: InitializeResult = {
+          protocolVersion: protocolVersion,
+          capabilities: this.getCapabilities(),
+          serverInfo: {
+            name: this.name,
+            version: this.version,
+          },
+          ...(this.instructions ? { instructions: this.instructions } : {}),
+        };
+
+        return {
+          jsonrpc: "2.0",
+          id: request.id,
+          result: initResponse,
+        };
+      }
+      default: {
+        return {
+          jsonrpc: "2.0",
+          id: request.id,
+          error: {
+            code: -32602,
+            message: "Unsupported protocol version",
+            data: {
+              supportedVersions: SUPPORTED_PROTOCOL_VERSIONS,
+            },
+          },
+        };
+      }
+    }
   }
 
   private async handleToolListRequest(

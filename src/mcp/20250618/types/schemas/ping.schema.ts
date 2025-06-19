@@ -12,15 +12,5 @@
  * and is attributed to the original authors under the License.
  */
 
-export const LATEST_PROTOCOL_VERSION = "2025-06-18";
-
-export const PROTOCOL_VERSION_2025_03_26 = "2025-03-26";
-export const PROTOCOL_VERSION_2024_11_05 = "2024-11-05";
-export const PROTOCOL_VERSION_2024_10_07 = "2024-10-07";
-
-export const SUPPORTED_PROTOCOL_VERSIONS = [
-  LATEST_PROTOCOL_VERSION,
-  PROTOCOL_VERSION_2025_03_26,
-  PROTOCOL_VERSION_2024_11_05,
-  PROTOCOL_VERSION_2024_10_07,
-];
+// Re-export from the 20250326 version as basic pinging schemas haven't changed
+export { PingRequestSchema } from "../../../20250326/types/schemas/ping.schema.js";
