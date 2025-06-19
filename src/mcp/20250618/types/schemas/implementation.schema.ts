@@ -12,15 +12,13 @@
  * and is attributed to the original authors under the License.
  */
 
-export const LATEST_PROTOCOL_VERSION = "2025-06-18";
+import { z } from "zod";
+import { BaseMetadataSchema } from "./base.schema.js";
 
-export const PROTOCOL_VERSION_2025_03_26 = "2025-03-26";
-export const PROTOCOL_VERSION_2024_11_05 = "2024-11-05";
-export const PROTOCOL_VERSION_2024_10_07 = "2024-10-07";
-
-export const SUPPORTED_PROTOCOL_VERSIONS = [
-  LATEST_PROTOCOL_VERSION,
-  PROTOCOL_VERSION_2025_03_26,
-  PROTOCOL_VERSION_2024_11_05,
-  PROTOCOL_VERSION_2024_10_07,
-];
+/**
+ * Describes the name and version of an MCP implementation, with an optional
+ * title for UI representation.
+ */
+export const ImplementationSchema = BaseMetadataSchema.extend({
+  version: z.string(),
+});
