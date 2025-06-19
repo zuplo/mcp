@@ -1,9 +1,7 @@
-# Structured content server
+# Calculator server
 
-This example shows how `structuredContent` can be used alongside the `content.text`
-field to output both JSON structured objects alongside their "stringy" representation.
-For backwards compatiblity, it's a good practice to fill in _both_ `structuredContent`
-and `content.text`.
+This calculator meta-tool demonstrates how `outputSchema` and `structuredContent`
+work together.
 
 ## 🏃 Build & run the server
 
@@ -30,8 +28,11 @@ curl -X POST \
   -d '{
     method: "tools/call"
     params:{
-      name: "say_hello"
-      arguments:{}
+      name: "add"
+      arguments:{
+        a: 1
+        b: 2
+      }
     }
   }' \
   localhost:3000/mcp

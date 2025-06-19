@@ -19,7 +19,7 @@ const server = new MCPServer({
   logger,
 });
 
-// addition
+// simple "say hello" tool that has both content.text and structuredContent
 server.addTool({
   name: "say_hello",
   description: "Simple hello to demonstrate using structuredContent",
