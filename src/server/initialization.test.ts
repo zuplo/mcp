@@ -157,10 +157,8 @@ describe("MCPServer", () => {
       expect(response.id).toBe(0);
 
       if ("error" in response) {
-        expect(response.error).toEqual({
-          code: -32602,
-          message: "Missing required parameter: protocolVersion",
-        });
+        expect(response.error.code).toBe(-32602);
+        expect(response.error.message).toContain("Invalid request parameters");
       } else {
         fail("Expected an error response, got a result");
       }
@@ -203,7 +201,9 @@ describe("MCPServer", () => {
 
       if ("error" in response) {
         expect(response.error.code).toBe(-32602);
-        expect(response.error.message).toBe("Unsupported protocol version");
+        expect(response.error.message).toContain(
+          "Unsupported protocol version"
+        );
         expect(response.error.data).toEqual({
           supportedVersions: [
             "2025-06-18",

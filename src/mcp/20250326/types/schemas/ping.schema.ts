@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { RequestSchema } from "../../../../jsonrpc2/schemas/request.js";
 
 /**

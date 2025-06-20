@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { AnnotationsSchema } from "./base.schema.js";
 
 /**
@@ -35,9 +35,9 @@ export const TextContentSchema = z
     /**
      * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
      */
-    _meta: z.optional(z.object({}).passthrough()),
+    _meta: z.optional(z.object({}).loose()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * An image provided to or from an LLM.
@@ -49,7 +49,7 @@ export const ImageContentSchema = z
     /**
      * The base64-encoded image data.
      */
-    data: z.string().base64(),
+    data: z.base64(),
 
     /**
      * The MIME type of the image. Different providers may support different image types.
@@ -64,9 +64,9 @@ export const ImageContentSchema = z
     /**
      * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
      */
-    _meta: z.optional(z.object({}).passthrough()),
+    _meta: z.optional(z.object({}).loose()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Audio provided to or from an LLM.
@@ -78,7 +78,7 @@ export const AudioContentSchema = z
     /**
      * The base64-encoded audio data.
      */
-    data: z.string().base64(),
+    data: z.base64(),
 
     /**
      * The MIME type of the audio. Different providers may support different audio types.
@@ -93,9 +93,9 @@ export const AudioContentSchema = z
     /**
      * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
      */
-    _meta: z.optional(z.object({}).passthrough()),
+    _meta: z.optional(z.object({}).loose()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * The contents of a resource, embedded into a prompt or tool call result.
@@ -110,20 +110,20 @@ export const EmbeddedResourceSchema = z.lazy(() =>
       resource: z.union([
         z
           .object({
-            uri: z.string().url(),
+            uri: z.url(),
             mimeType: z.optional(z.string()),
-            _meta: z.optional(z.object({}).passthrough()),
+            _meta: z.optional(z.object({}).loose()),
             text: z.string(),
           })
-          .passthrough(),
+          .loose(),
         z
           .object({
-            uri: z.string().url(),
+            uri: z.url(),
             mimeType: z.optional(z.string()),
-            _meta: z.optional(z.object({}).passthrough()),
-            blob: z.string().base64(),
+            _meta: z.optional(z.object({}).loose()),
+            blob: z.base64(),
           })
-          .passthrough(),
+          .loose(),
       ]),
 
       /**
@@ -134,7 +134,7 @@ export const EmbeddedResourceSchema = z.lazy(() =>
       /**
        * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
        */
-      _meta: z.optional(z.object({}).passthrough()),
+      _meta: z.optional(z.object({}).loose()),
     })
-    .passthrough()
+    .loose()
 );

@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const ProgressSchema = z
   .object({
@@ -27,4 +27,4 @@ export const ProgressSchema = z
      */
     total: z.optional(z.number()),
   })
-  .passthrough();
+  .loose();

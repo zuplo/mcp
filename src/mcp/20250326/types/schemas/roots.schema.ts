@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import { RequestSchema } from "../../../../jsonrpc2/schemas/request.js";
 import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
@@ -34,7 +34,7 @@ export const RootSchema = z
      */
     name: z.optional(z.string()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Sent from the server to request a list of root URIs from the client.

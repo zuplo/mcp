@@ -14,7 +14,8 @@ import type {
 export interface InputParamValidatorReturn<T> {
   success: boolean;
   data: T | null;
-  error: string | null;
+  errorData: unknown | null;
+  errorMessage?: string;
 }
 
 /**

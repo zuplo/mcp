@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
@@ -31,7 +31,7 @@ export const ResourceTemplateReferenceSchema = z
      */
     uri: z.string(),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Identifies a prompt.
@@ -61,7 +61,7 @@ export const CompleteRequestSchema = RequestSchema.extend({
          */
         value: z.string(),
       })
-      .passthrough(),
+      .loose(),
 
     /**
      * Additional, optional context for completions
@@ -74,7 +74,7 @@ export const CompleteRequestSchema = RequestSchema.extend({
            */
           arguments: z.optional(z.record(z.string(), z.string())),
         })
-        .passthrough()
+        .loose()
     ),
   }),
 });
@@ -100,5 +100,5 @@ export const CompleteResultSchema = ResultSchema.extend({
        */
       hasMore: z.optional(z.boolean()),
     })
-    .passthrough(),
+    .loose(),
 });

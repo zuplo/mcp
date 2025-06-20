@@ -3,7 +3,7 @@ import { Hono } from 'hono';
 import { MCPServer } from "@zuplo/mcp/server";
 import { HTTPStreamableTransport } from "@zuplo/mcp/transport/httpstreamable";
 import { ConsoleLogger } from "@zuplo/mcp/logger";
-import { z } from 'zod';
+import { z } from "zod/v4";
 import { ZodValidator } from '@zuplo/mcp/tools/zod';
 
 // Hono app for routing and handling fetch API Request / Response

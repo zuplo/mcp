@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import { RequestSchema } from "../../../../jsonrpc2/schemas/request.js";
 import { ResultSchema } from "../../../../jsonrpc2/schemas/response.js";
@@ -27,7 +27,7 @@ export const RootSchema = z
      * This restriction may be relaxed in future versions of the protocol to allow
      * other URI schemes.
      */
-    uri: z.string().url(),
+    uri: z.url(),
     /**
      * An optional name for the root. This can be used to provide a human-readable
      * identifier for the root, which may be useful for display purposes or for
@@ -38,9 +38,9 @@ export const RootSchema = z
     /**
      * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
      */
-    _meta: z.optional(z.object({}).passthrough()),
+    _meta: z.optional(z.object({}).loose()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Sent from the server to request a list of root URIs from the client. Roots allow

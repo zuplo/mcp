@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { JSONRPC_VERSION } from "../consts.js";
 
 export const BaseNotificationParamsSchema = z
@@ -21,9 +21,9 @@ export const BaseNotificationParamsSchema = z
      * This parameter name is reserved by MCP to allow clients and servers to
      * attach additional metadata to their notifications.
      */
-    _meta: z.optional(z.object({}).passthrough()),
+    _meta: z.optional(z.object({}).loose()),
   })
-  .passthrough();
+  .loose();
 
 export const NotificationSchema = z.object({
   method: z.string(),
@@ -36,6 +36,6 @@ export const NotificationSchema = z.object({
 export const JSONRPCNotificationSchema = z
   .object({
     jsonrpc: z.literal(JSONRPC_VERSION),
+    ...NotificationSchema.shape,
   })
-  .merge(NotificationSchema)
   .strict();

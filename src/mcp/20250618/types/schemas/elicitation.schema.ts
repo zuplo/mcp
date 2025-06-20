@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
@@ -28,7 +28,7 @@ export const StringSchemaSchema = z
     maxLength: z.optional(z.number()),
     format: z.optional(z.enum(["email", "uri", "date", "date-time"])),
   })
-  .passthrough();
+  .loose();
 
 export const NumberSchemaSchema = z
   .object({
@@ -38,7 +38,7 @@ export const NumberSchemaSchema = z
     minimum: z.optional(z.number()),
     maximum: z.optional(z.number()),
   })
-  .passthrough();
+  .loose();
 
 export const BooleanSchemaSchema = z
   .object({
@@ -47,7 +47,7 @@ export const BooleanSchemaSchema = z
     description: z.optional(z.string()),
     default: z.optional(z.boolean()),
   })
-  .passthrough();
+  .loose();
 
 export const EnumSchemaSchema = z
   .object({
@@ -57,7 +57,7 @@ export const EnumSchemaSchema = z
     enum: z.array(z.string()),
     enumNames: z.optional(z.array(z.string())), // Display names for enum values
   })
-  .passthrough();
+  .loose();
 
 /**
  * Restricted schema definitions that only allow primitive types
@@ -90,7 +90,7 @@ export const ElicitRequestSchema = RequestSchema.extend({
         properties: z.record(z.string(), PrimitiveSchemaDefinitionSchema),
         required: z.optional(z.array(z.string())),
       })
-      .passthrough(),
+      .loose(),
   }),
 });
 

@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
@@ -46,7 +46,7 @@ export const ModelHintSchema = z
      */
     name: z.optional(z.string()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * The server's preferences for model selection, requested of the client during sampling.
@@ -95,7 +95,7 @@ export const ModelPreferencesSchema = z
      */
     intelligencePriority: z.optional(z.number().min(0).max(1)),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Describes a message issued to or received from an LLM API.
@@ -109,7 +109,7 @@ export const SamplingMessageSchema = z
       AudioContentSchema,
     ]),
   })
-  .passthrough();
+  .loose();
 
 /**
  * A request from the server to sample an LLM via the client. The client has full
@@ -147,7 +147,7 @@ export const CreateMessageRequestSchema = RequestSchema.extend({
      * Optional metadata to pass through to the LLM provider. The format of this
      * metadata is provider-specific.
      */
-    metadata: z.optional(z.object({}).passthrough()),
+    metadata: z.optional(z.object({}).loose()),
   }),
 });
 

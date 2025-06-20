@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Base interface for metadata with name (identifier) and title (display name)
@@ -37,7 +37,7 @@ export const BaseMetadataSchema = z
      */
     title: z.optional(z.string()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Optional annotations for the client. The client can use annotations to inform
@@ -72,4 +72,4 @@ export const AnnotationsSchema = z
      */
     lastModified: z.optional(z.string()),
   })
-  .passthrough();
+  .loose();

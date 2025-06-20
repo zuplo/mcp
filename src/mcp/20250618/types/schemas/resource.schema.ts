@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -33,7 +33,7 @@ export const ResourceContentsSchema = z
     /**
      * The URI of this resource.
      */
-    uri: z.string().url(),
+    uri: z.url(),
     /**
      * The MIME type of this resource, if known.
      */
@@ -42,9 +42,9 @@ export const ResourceContentsSchema = z
     /**
      * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
      */
-    _meta: z.optional(z.object({}).passthrough()),
+    _meta: z.optional(z.object({}).loose()),
   })
-  .passthrough();
+  .loose();
 
 export const TextResourceContentsSchema = ResourceContentsSchema.extend({
   /**
@@ -58,7 +58,7 @@ export const BlobResourceContentsSchema = ResourceContentsSchema.extend({
   /**
    * A base64-encoded string representing the binary data of the item.
    */
-  blob: z.string().base64(),
+  blob: z.base64(),
 });
 
 /**
@@ -68,7 +68,7 @@ export const ResourceSchema = BaseMetadataSchema.extend({
   /**
    * The URI of this resource.
    */
-  uri: z.string().url(),
+  uri: z.url(),
 
   /**
    * A description of what this resource represents.
@@ -99,7 +99,7 @@ export const ResourceSchema = BaseMetadataSchema.extend({
   /**
    * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
    */
-  _meta: z.optional(z.object({}).passthrough()),
+  _meta: z.optional(z.object({}).loose()),
 });
 
 /**
@@ -145,7 +145,7 @@ export const ResourceTemplateSchema = BaseMetadataSchema.extend({
   /**
    * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
    */
-  _meta: z.optional(z.object({}).passthrough()),
+  _meta: z.optional(z.object({}).loose()),
 });
 
 /**
@@ -188,7 +188,7 @@ export const ReadResourceRequestSchema = RequestSchema.extend({
      * The URI of the resource to read. The URI can use any protocol; it is up
      * to the server how to interpret it.
      */
-    uri: z.string().url(),
+    uri: z.url(),
   }),
 });
 
@@ -212,7 +212,7 @@ export const SubscribeRequestSchema = RequestSchema.extend({
      * The URI of the resource to subscribe to. The URI can use any protocol;
      * it is up to the server how to interpret it.
      */
-    uri: z.string().url(),
+    uri: z.url(),
   }),
 });
 
@@ -226,7 +226,7 @@ export const UnsubscribeRequestSchema = RequestSchema.extend({
     /**
      * The URI of the resource to unsubscribe from.
      */
-    uri: z.string().url(),
+    uri: z.url(),
   }),
 });
 
@@ -252,7 +252,7 @@ export const ResourceUpdatedNotificationSchema = NotificationSchema.extend({
        * The URI of the resource that has been updated. This might be a
        * sub-resource of the one that the client actually subscribed to.
        */
-      uri: z.string().url(),
+      uri: z.url(),
     })
-    .passthrough(),
+    .loose(),
 });

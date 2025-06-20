@@ -1,5 +1,4 @@
-import type { AnyZodObject, z } from "zod";
-import zodToJsonSchema from "zod-to-json-schema";
+import { type ZodObject, z } from "zod/v4";
 import type {
   InputParamValidator,
   InputParamValidatorReturn,
@@ -13,21 +12,26 @@ import type {
  * validated params to tool calls.
  */
 
-export class ZodValidator<S extends AnyZodObject>
+export class ZodValidator<S extends ZodObject>
   implements InputParamValidator<z.infer<S>>
 {
   readonly jsonSchema: object;
   readonly schema: S;
 
   constructor(schema: S) {
-    this.jsonSchema = zodToJsonSchema(schema);
+    this.jsonSchema = z.toJSONSchema(schema);
     this.schema = schema;
   }
 
   parse(input: unknown): InputParamValidatorReturn<z.infer<S>> {
     const parsed = this.schema.safeParse(input);
     return parsed.success
-      ? { success: true, data: parsed.data, error: null }
-      : { success: false, data: null, error: parsed.error.message };
+      ? { success: true, data: parsed.data, errorData: null }
+      : {
+          success: false,
+          data: null,
+          errorData: z.treeifyError(parsed.error),
+          errorMessage: z.prettifyError(parsed.error),
+        };
   }
 }

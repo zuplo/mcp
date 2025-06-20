@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { JSONRPC_VERSION } from "../consts.js";
 import { IdSchema } from "./id.js";
 
@@ -33,13 +33,13 @@ export const RequestMetaSchema = z
      */
     progressToken: z.optional(ProgressTokenSchema),
   })
-  .passthrough();
+  .loose();
 
 export const BaseRequestParamsSchema = z
   .object({
     _meta: z.optional(RequestMetaSchema),
   })
-  .passthrough();
+  .loose();
 
 export const RequestSchema = z.object({
   method: z.string(),
@@ -53,6 +53,6 @@ export const JSONRPCRequestSchema = z
   .object({
     jsonrpc: z.literal(JSONRPC_VERSION),
     id: IdSchema,
+    ...RequestSchema.shape,
   })
-  .merge(RequestSchema)
   .strict();
