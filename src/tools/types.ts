@@ -1,4 +1,4 @@
-import type { CallToolResult } from "../mcp/20250326/types/types.js";
+import type { CallToolResult, Tool } from "../mcp/20250618/types/types.js";
 import type { InputParamValidator, ParsedData } from "../server/types.js";
 
 /**
@@ -17,4 +17,5 @@ export interface ToolConfig<
   validator: V;
   handler: (params: ParsedData<V>) => Promise<R> | R;
   description?: string;
+  outputSchema?: Tool["outputSchema"];
 }

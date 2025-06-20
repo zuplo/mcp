@@ -127,12 +127,14 @@ export class MCPServer {
       validator,
       handler,
       description = `Execute the ${name} tool`,
+      outputSchema,
     } = config;
 
     const toolSchema: Tool = {
       name,
       description,
       inputSchema: validator.jsonSchema as Tool["inputSchema"],
+      ...(outputSchema && { outputSchema }),
     };
 
     const registered: RegisteredTool = {
