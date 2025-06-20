@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Describes the name and version of an MCP implementation.
@@ -22,4 +22,4 @@ export const ImplementationSchema = z
     name: z.string(),
     version: z.string(),
   })
-  .passthrough();
+  .loose();

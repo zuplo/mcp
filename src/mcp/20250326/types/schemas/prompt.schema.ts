@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -50,7 +50,7 @@ export const PromptArgumentSchema = z
      */
     required: z.optional(z.boolean()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * A prompt or prompt template that the server offers.
@@ -72,7 +72,7 @@ export const PromptSchema = z
      */
     arguments: z.optional(z.array(PromptArgumentSchema)),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Sent from the client to request a list of prompts and prompt templates the server has.
@@ -102,7 +102,7 @@ export const GetPromptRequestSchema = RequestSchema.extend({
     /**
      * Arguments to use for templating the prompt.
      */
-    arguments: z.optional(z.record(z.string())),
+    arguments: z.optional(z.record(z.string(), z.string())),
   }),
 });
 
@@ -119,7 +119,7 @@ export const PromptMessageSchema = z
       EmbeddedResourceSchema,
     ]),
   })
-  .passthrough();
+  .loose();
 
 /**
  * The server's response to a prompts/get request from the client.

@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -55,7 +55,7 @@ export const PromptSchema = BaseMetadataSchema.extend({
   /**
    * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
    */
-  _meta: z.optional(z.object({}).passthrough()),
+  _meta: z.optional(z.object({}).loose()),
 });
 
 /**
@@ -84,7 +84,7 @@ export const PromptMessageSchema = z.lazy(() => {
         EmbeddedResourceSchema,
       ]),
     })
-    .passthrough();
+    .loose();
 });
 
 /**

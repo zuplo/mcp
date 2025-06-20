@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { NotificationSchema } from "../../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -84,7 +84,7 @@ export const ToolAnnotationsSchema = z
      */
     openWorldHint: z.optional(z.boolean()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Definition for a tool the client can call.
@@ -107,16 +107,16 @@ export const ToolSchema = z
     inputSchema: z
       .object({
         type: z.literal("object"),
-        properties: z.optional(z.object({}).passthrough()),
+        properties: z.optional(z.object({}).loose()),
       })
-      .passthrough(),
+      .loose(),
 
     /**
      * Optional additional tool information.
      */
     annotations: z.optional(ToolAnnotationsSchema),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Sent from the client to request a list of tools the server has.
@@ -164,7 +164,7 @@ export const CallToolRequestSchema = RequestSchema.extend({
   method: z.literal("tools/call"),
   params: BaseRequestParamsSchema.extend({
     name: z.string(),
-    arguments: z.optional(z.record(z.unknown())),
+    arguments: z.optional(z.record(z.string(), z.unknown())),
   }),
 });
 

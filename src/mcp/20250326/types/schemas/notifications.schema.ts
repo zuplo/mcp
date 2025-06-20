@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { IdSchema } from "../../../../jsonrpc2/schemas/id.js";
 import {
   BaseNotificationParamsSchema,
@@ -67,11 +67,14 @@ export const InitializedNotificationSchema = NotificationSchema.extend({
  */
 export const ProgressNotificationSchema = NotificationSchema.extend({
   method: z.literal("notifications/progress"),
-  params: BaseNotificationParamsSchema.merge(ProgressSchema).extend({
+  params: z.object({
     /**
      * The progress token which was given in the initial request, used to
      * associate this notification with the request that is proceeding.
      */
     progressToken: ProgressTokenSchema,
+
+    ...BaseNotificationParamsSchema.shape,
+    ...ProgressSchema.shape,
   }),
 });

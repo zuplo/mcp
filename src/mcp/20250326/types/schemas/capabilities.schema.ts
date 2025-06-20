@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Capabilities a client may support. Known capabilities are defined here,
@@ -24,12 +24,12 @@ export const ClientCapabilitiesSchema = z
     /**
      * Experimental, non-standard capabilities that the client supports.
      */
-    experimental: z.optional(z.object({}).passthrough()),
+    experimental: z.optional(z.object({}).loose()),
 
     /**
      * Present if the client supports sampling from an LLM.
      */
-    sampling: z.optional(z.object({}).passthrough()),
+    sampling: z.optional(z.object({}).loose()),
 
     /**
      * Present if the client supports listing roots.
@@ -43,10 +43,10 @@ export const ClientCapabilitiesSchema = z
            */
           listChanged: z.optional(z.boolean()),
         })
-        .passthrough()
+        .loose()
     ),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Capabilities that a server may support. Known capabilities are defined here,
@@ -58,17 +58,17 @@ export const ServerCapabilitiesSchema = z
     /**
      * Experimental, non-standard capabilities that the server supports.
      */
-    experimental: z.optional(z.object({}).passthrough()),
+    experimental: z.optional(z.object({}).loose()),
 
     /**
      * Present if the server supports sending log messages to the client.
      */
-    logging: z.optional(z.object({}).passthrough()),
+    logging: z.optional(z.object({}).loose()),
 
     /**
      * Present if the server supports sending completions to the client.
      */
-    completions: z.optional(z.object({}).passthrough()),
+    completions: z.optional(z.object({}).loose()),
 
     /**
      * Present if the server offers any prompt templates.
@@ -82,7 +82,7 @@ export const ServerCapabilitiesSchema = z
            */
           listChanged: z.optional(z.boolean()),
         })
-        .passthrough()
+        .loose()
     ),
 
     /**
@@ -102,7 +102,7 @@ export const ServerCapabilitiesSchema = z
            */
           listChanged: z.optional(z.boolean()),
         })
-        .passthrough()
+        .loose()
     ),
 
     /**
@@ -117,7 +117,7 @@ export const ServerCapabilitiesSchema = z
            */
           listChanged: z.optional(z.boolean()),
         })
-        .passthrough()
+        .loose()
     ),
   })
-  .passthrough();
+  .loose();

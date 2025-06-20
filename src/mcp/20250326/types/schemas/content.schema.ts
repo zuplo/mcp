@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   BlobResourceContentsSchema,
   TextResourceContentsSchema,
@@ -30,7 +30,7 @@ export const TextContentSchema = z
      */
     text: z.string(),
   })
-  .passthrough();
+  .loose();
 
 /**
  * An image provided to or from an LLM.
@@ -42,7 +42,7 @@ export const ImageContentSchema = z
     /**
      * The base64-encoded image data.
      */
-    data: z.string().base64(),
+    data: z.base64(),
 
     /**
      * The MIME type of the image. Different providers may support different
@@ -50,7 +50,7 @@ export const ImageContentSchema = z
      */
     mimeType: z.string(),
   })
-  .passthrough();
+  .loose();
 
 /**
  * An Audio provided to or from an LLM.
@@ -62,7 +62,7 @@ export const AudioContentSchema = z
     /**
      * The base64-encoded audio data.
      */
-    data: z.string().base64(),
+    data: z.base64(),
 
     /**
      * The MIME type of the audio. Different providers may support different
@@ -70,7 +70,7 @@ export const AudioContentSchema = z
      */
     mimeType: z.string(),
   })
-  .passthrough();
+  .loose();
 
 /**
  * The contents of a resource, embedded into a prompt or tool call result.
@@ -80,4 +80,4 @@ export const EmbeddedResourceSchema = z
     type: z.literal("resource"),
     resource: z.union([TextResourceContentsSchema, BlobResourceContentsSchema]),
   })
-  .passthrough();
+  .loose();

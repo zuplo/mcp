@@ -1,3 +1,4 @@
+import { z } from "zod/v4";
 import type {
   JSONRPCError,
   JSONRPCMessage,
@@ -238,29 +239,15 @@ export class MCPServer {
     const parseResult = InitializeRequestSchema.safeParse(request);
 
     if (!parseResult.success) {
-      // Extract the specific error
-      const errors = parseResult.error.format();
-
-      // Check if protocolVersion is missing
-      if (errors.params?.protocolVersion?._errors?.length) {
-        return {
-          jsonrpc: "2.0",
-          id: request.id,
-          error: {
-            code: -32602,
-            message: "Missing required parameter: protocolVersion",
-          },
-        };
-      }
-
-      // Other validation errors
+      const treeErrors = z.treeifyError(parseResult.error);
+      const prettyErrors = z.prettifyError(parseResult.error);
       return {
         jsonrpc: "2.0",
         id: request.id,
         error: {
           code: -32602,
-          message: "Invalid request parameters",
-          data: parseResult.error.errors,
+          message: `Invalid request parameters: ${prettyErrors}`,
+          data: treeErrors,
         },
       };
     }
@@ -294,7 +281,7 @@ export class MCPServer {
           id: request.id,
           error: {
             code: -32602,
-            message: "Unsupported protocol version",
+            message: `Unsupported protocol version: ${protocolVersion} - supported versions: ${SUPPORTED_PROTOCOL_VERSIONS}`,
             data: {
               supportedVersions: SUPPORTED_PROTOCOL_VERSIONS,
             },
@@ -371,8 +358,10 @@ export class MCPServer {
         id: request.id,
         error: {
           code: -32602,
-          message: "Invalid params",
-          data: validation.error,
+          message: validation.errorMessage
+            ? `Invalid arguments for tool '${toolName}': ${validation.errorMessage}`
+            : `Invalid arguments for tool '${toolName}'`,
+          data: validation.errorData,
         },
       };
     }

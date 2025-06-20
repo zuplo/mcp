@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { JSONRPC_VERSION } from "../consts.js";
 import { IdSchema } from "./id.js";
 
@@ -22,9 +22,9 @@ export const ResultSchema = z
      * This result property is reserved by the protocol to allow clients and
      * servers to attach additional metadata to their responses.
      */
-    _meta: z.optional(z.object({}).passthrough()),
+    _meta: z.optional(z.object({}).loose()),
   })
-  .passthrough();
+  .loose();
 
 /* Empty result */
 /**

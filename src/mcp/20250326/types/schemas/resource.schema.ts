@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
   BaseNotificationParamsSchema,
   NotificationSchema,
@@ -44,7 +44,7 @@ export const ResourceContentsSchema = z
      */
     mimeType: z.optional(z.string()),
   })
-  .passthrough();
+  .loose();
 
 export const TextResourceContentsSchema = ResourceContentsSchema.extend({
   /**
@@ -58,7 +58,7 @@ export const BlobResourceContentsSchema = ResourceContentsSchema.extend({
   /**
    * A base64-encoded string representing the binary data of the item.
    */
-  blob: z.string().base64(),
+  blob: z.base64(),
 });
 
 /**
@@ -91,7 +91,7 @@ export const ResourceSchema = z
      */
     mimeType: z.optional(z.string()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * A template description for resources available on the server.
@@ -125,7 +125,7 @@ export const ResourceTemplateSchema = z
      */
     mimeType: z.optional(z.string()),
   })
-  .passthrough();
+  .loose();
 
 /**
  * Sent from the client to request a list of resources the server has.
