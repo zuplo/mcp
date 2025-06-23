@@ -102,11 +102,16 @@ export class MCPServer {
   }
 
   getTool(name: string): Tool | undefined {
-    throw new Error("Method not implemented.");
+    const registeredTool = this.tools.get(name);
+    return registeredTool?.tool;
   }
 
   getTools(): Map<string, Tool> {
-    throw new Error("Method not implemented.");
+    const toolsMap = new Map<string, Tool>();
+    for (const [name, registeredTool] of this.tools.entries()) {
+      toolsMap.set(name, registeredTool.tool);
+    }
+    return toolsMap;
   }
 
   /**
