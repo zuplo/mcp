@@ -15,10 +15,9 @@ import { getTaffrailRules } from './taffrail.js';
 
 if (!TAFFRAIL_API_KEY) {
   console.warn("Warning: TAFFRAIL_API_KEY environment variable is not set. Some features may not work as expected.");
-}
-
-if (!TAFFRAIL_API_KEY) {
-  console.warn("Warning: TAFFRAIL_API_KEY environment variable is not set. Some features may not work as expected.");
+}else{  
+  const apiKeySuffix = TAFFRAIL_API_KEY ? TAFFRAIL_API_KEY.slice(-6) : 'undefined';
+  console.error(`TAFFRAIL_API_KEY (last 6): ...${apiKeySuffix}`);
 }
 
 const TOOL_NAME = "Taffrail-Precise-Answer";

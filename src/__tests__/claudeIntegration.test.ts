@@ -49,7 +49,7 @@ describe('Claude API Integration with Ping Server', () => {
   console.log(`MCP Server URL from .env: ${process.env.MCP_SERVER_URL}`);
   console.log(`MCP Server URL being used in test: ${mcpServer}`);
 
-  questions.forEach((question: string) => {
+  questions.forEach(({ question, requiredString }) => {
     it(`should get a response for: ${question}`, async () => {
       console.log(`\nQUESTION: ${question}`);
       // With MCP server
@@ -72,6 +72,8 @@ describe('Claude API Integration with Ping Server', () => {
           } as any);
           console.log('MCP REQUEST ID:', mcp._request_id);
           expect(mcp.content).toBeTruthy();
+          const contentString = typeof mcp.content === 'object' ? JSON.stringify(mcp.content) : String(mcp.content);
+          expect(contentString).toContain(requiredString);
           console.log(`MCP RESPONSE: ${typeof mcp.content === 'object' ? JSON.stringify(mcp.content, null, 2) : mcp.content}`);
         } catch (error: any) {
           // Try to log request ID if present in error response
