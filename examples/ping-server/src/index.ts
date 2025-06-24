@@ -21,7 +21,22 @@ server.withTransport(transport);
 app.post('/mcp', async (c) => {
   try {
     const request = c.req.raw;
-    return transport.handleRequest(request);
+    // Log incoming request details
+    console.log('--- Incoming /mcp request ---');
+    console.log('Method:', request.method);
+    console.log('URL:', request.url);
+    console.log('Headers:', JSON.stringify(Object.fromEntries(request.headers.entries()), null, 2));
+    const reqBody = await request.clone().text();
+    console.log('Body:', reqBody);
+
+    // Hand off to transport
+    const response = await transport.handleRequest(request);
+    // Log outgoing response details
+    console.log('--- Outgoing /mcp response ---');
+    console.log('Status:', response.status);
+    const resBody = await response.clone().text();
+    console.log('Body:', resBody);
+    return response;
   } catch (error) {
     console.error('Error handling MCP request:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
