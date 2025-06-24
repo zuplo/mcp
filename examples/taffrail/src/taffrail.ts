@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const TAFFRAIL_API_KEY = process.env.TAFFRAIL_API_KEY || "TFfos5FOyMtIBdFiN1u91Ml.wJqr-v3ywxaJv6zMI746R1i0fkS79jM3IUPWLcXtZc";
+const TAFFRAIL_API_KEY = process.env.TAFFRAIL_API_KEY;
 
 const TAFFRAIL_API_URL = 'https://engine.taffrail.com/api/rules';
 const TAFFRAIL_ADVICE_API_URL = 'https://engine.taffrail.com/api/advice';

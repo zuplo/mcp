@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-const TAFFRAIL_API_KEY = process.env.TAFFRAIL_API_KEY || "TFfos5FOyMtIBdFiN1u91Ml.wJqr-v3ywxaJv6zMI746R1i0fkS79jM3IUPWLcXtZc";
+const TAFFRAIL_API_KEY = process.env.TAFFRAIL_API_KEY;
 
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono';
