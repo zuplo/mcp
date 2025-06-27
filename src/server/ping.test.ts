@@ -1,4 +1,5 @@
 import type { JSONRPCRequest } from "../jsonrpc2/types.js";
+import { ConsoleLogger } from "../logger/index.js";
 import { MCPServer } from "./index.js";
 
 describe("MCPServer", () => {
@@ -7,8 +8,10 @@ describe("MCPServer", () => {
       const server = new MCPServer({
         name: "example ping server",
         version: "0.0.0",
+        logger: new ConsoleLogger(),
       });
 
+      console.log("Sending ping request to MCPServer...");
       const pingRequest: JSONRPCRequest = {
         jsonrpc: "2.0",
         id: "123",
@@ -16,6 +19,7 @@ describe("MCPServer", () => {
       };
 
       const response = await server.handleRequest(pingRequest);
+      console.log("Received response from MCPServer:", response);
 
       expect(response).toBeDefined();
       expect(response.jsonrpc).toBe("2.0");
