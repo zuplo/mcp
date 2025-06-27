@@ -1,5 +1,5 @@
 import type { JSONRPCRequest } from "../jsonrpc2/types.js";
-import type { InitializeResult } from "../mcp/20250326/types/types.js";
+import type { InitializeResult } from "../mcp/20250326/types.js";
 import {
   LATEST_PROTOCOL_VERSION,
   PROTOCOL_VERSION_2025_03_26,
