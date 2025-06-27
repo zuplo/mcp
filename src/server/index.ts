@@ -13,15 +13,15 @@ import {
 } from "../jsonrpc2/validation.js";
 import { createDefaultLogger } from "../logger/index.js";
 import type { Logger } from "../logger/types.js";
-import { InitializeRequestSchema } from "../mcp/20250618/types/schemas/initialize.schema.js";
-import { CallToolRequestSchema } from "../mcp/20250618/types/schemas/tools.schema.js";
+import { InitializeRequestSchema } from "../mcp/20250618/schemas/initialize.schema.js";
+import { CallToolRequestSchema } from "../mcp/20250618/schemas/tools.schema.js";
 import type {
   CallToolResult,
   InitializeResult,
   ListToolsResult,
   ServerCapabilities,
   Tool,
-} from "../mcp/20250618/types/types.js";
+} from "../mcp/20250618/types.js";
 import {
   LATEST_PROTOCOL_VERSION,
   PROTOCOL_VERSION_2024_10_07,

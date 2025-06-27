@@ -22,6 +22,18 @@
     "README.md"
   ],
   "exports": {
+    "./types": {
+      "types": "./dist/mcp/20250618/types.d.ts",
+      "import": "./dist/mcp/20250618/types.js"
+    },
+    "./20250326": {
+      "types": "./dist/mcp/20250326/types.d.ts",
+      "import": "./dist/mcp/20250326/types.js"
+    },
+    "./20250618": {
+      "types": "./dist/mcp/20250618/types.d.ts",
+      "import": "./dist/mcp/20250618/types.js"
+    },
     "./jsonrpc2/validation": {
       "types": "./dist/jsonrpc2/validation.d.ts",
       "import": "./dist/jsonrpc2/validation.js"
