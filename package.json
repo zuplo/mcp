@@ -57,6 +57,10 @@
     "./tools/custom": {
       "types": "./dist/tools/custom.d.ts",
       "import": "./dist/tools/custom.js"
+    },
+    "./tools/types": {
+      "types": "./dist/tools/types.d.ts",
+      "import": "./dist/tools/types.js"
     }
   },
   "repository": {
