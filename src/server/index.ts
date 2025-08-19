@@ -14,11 +14,18 @@ import {
 import { createDefaultLogger } from "../logger/index.js";
 import type { Logger } from "../logger/types.js";
 import { InitializeRequestSchema } from "../mcp/20250618/schemas/initialize.schema.js";
+import {
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
+} from "../mcp/20250618/schemas/prompt.schema.js";
 import { CallToolRequestSchema } from "../mcp/20250618/schemas/tools.schema.js";
 import type {
   CallToolResult,
+  GetPromptResult,
   InitializeResult,
+  ListPromptsResult,
   ListToolsResult,
+  Prompt,
   ServerCapabilities,
   Tool,
 } from "../mcp/20250618/types.js";
@@ -29,6 +36,7 @@ import {
   PROTOCOL_VERSION_2025_03_26,
   SUPPORTED_PROTOCOL_VERSIONS,
 } from "../mcp/versions.js";
+import type { PromptConfig, RegisteredPrompt } from "../prompts/types.js";
 import type { ToolConfig } from "../tools/types.js";
 import type { Transport } from "../transport/types.js";
 import type {
@@ -43,6 +51,7 @@ export const DEFAULT_MCP_SERVER_VERSION = "0.0.0";
 export class MCPServer {
   private capabilities: ServerCapabilities;
   private tools: Map<string, RegisteredTool> = new Map();
+  private prompts: Map<string, RegisteredPrompt> = new Map();
   private name: string;
   private version: string;
   private instructions: string | undefined;
@@ -60,6 +69,7 @@ export class MCPServer {
         supported: true,
         available: [],
       },
+      prompts: {},
       ...options.capabilities,
     };
   }
@@ -177,6 +187,59 @@ export class MCPServer {
   }
 
   /**
+   * Register a prompt
+   */
+  public addPrompt<V extends InputParamValidator<unknown>>(
+    config: PromptConfig<V>
+  ): void {
+    const {
+      name,
+      validator,
+      generator,
+      description,
+      arguments: promptArguments,
+      _meta,
+    } = config;
+
+    const promptSchema: Prompt = {
+      name,
+      ...(description && { description }),
+      ...(promptArguments && { arguments: promptArguments }),
+      ...(_meta && { _meta }),
+    };
+
+    const registered: RegisteredPrompt = {
+      prompt: promptSchema,
+      validator,
+      generator,
+    };
+
+    this.prompts.set(name, registered);
+  }
+
+  /**
+   * Remove a prompt from the server
+   */
+  public removePrompt(name: string): boolean {
+    return this.prompts.delete(name);
+  }
+
+  /**
+   * Get a specific prompt by name
+   */
+  public getPrompt(name: string): Prompt | undefined {
+    const registeredPrompt = this.prompts.get(name);
+    return registeredPrompt?.prompt;
+  }
+
+  /**
+   * Get all registered prompts
+   */
+  public getPromptDefinitions(): Prompt[] {
+    return Array.from(this.prompts.values()).map((prompt) => prompt.prompt);
+  }
+
+  /**
    * Handle a JSON-RPC request
    */
   public async handleRequest(
@@ -192,6 +255,10 @@ export class MCPServer {
           return this.handleToolListRequest(request);
         case "tools/call":
           return this.handleToolCallRequest(request);
+        case "prompts/list":
+          return this.handlePromptListRequest(request);
+        case "prompts/get":
+          return this.handlePromptGetRequest(request);
         default:
           // Method not found
           return {
@@ -396,6 +463,127 @@ export class MCPServer {
           code: -32603,
           message:
             error instanceof Error ? error.message : "Tool execution error",
+        },
+      };
+    }
+  }
+
+  /**
+   * Handle prompts/list request
+   */
+  private async handlePromptListRequest(
+    request: JSONRPCRequest
+  ): Promise<JSONRPCResponse | JSONRPCError> {
+    const parseResult = ListPromptsRequestSchema.safeParse(request);
+
+    if (!parseResult.success) {
+      const treeErrors = z.treeifyError(parseResult.error);
+      const prettyErrors = z.prettifyError(parseResult.error);
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32602,
+          message: `Invalid request parameters: ${prettyErrors}`,
+          data: treeErrors,
+        },
+      };
+    }
+
+    const promptsArray = Array.from(this.prompts.values()).map(
+      (registeredPrompt) => registeredPrompt.prompt
+    );
+
+    const result: ListPromptsResult = {
+      prompts: promptsArray,
+    };
+
+    return {
+      jsonrpc: "2.0",
+      id: request.id,
+      result,
+    };
+  }
+
+  /**
+   * Handle prompts/get request
+   */
+  private async handlePromptGetRequest(
+    request: JSONRPCRequest
+  ): Promise<JSONRPCResponse | JSONRPCError> {
+    const parseResult = GetPromptRequestSchema.safeParse(request);
+
+    if (!parseResult.success) {
+      const treeErrors = z.treeifyError(parseResult.error);
+      const prettyErrors = z.prettifyError(parseResult.error);
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32602,
+          message: `Invalid request parameters: ${prettyErrors}`,
+          data: treeErrors,
+        },
+      };
+    }
+
+    const promptName = parseResult.data.params.name;
+    const prompt = this.prompts.get(promptName);
+
+    if (!prompt) {
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32602,
+          message: `Prompt "${promptName}" not found`,
+        },
+      };
+    }
+
+    const rawArgs = parseResult.data.params.arguments ?? {};
+    const validation = prompt.validator.parse(rawArgs);
+
+    if (!validation.success) {
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32602,
+          message: validation.errorMessage
+            ? `Invalid arguments for prompt '${promptName}': ${validation.errorMessage}`
+            : `Invalid arguments for prompt '${promptName}'`,
+          data: validation.errorData,
+        },
+      };
+    }
+
+    try {
+      const data = validation.data as object;
+      const messages = await prompt.generator(data);
+
+      const result: GetPromptResult = {
+        ...(prompt.prompt.description && {
+          description: prompt.prompt.description,
+        }),
+        messages,
+      };
+
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        result,
+      };
+    } catch (error) {
+      this.logger.error(`Error generating prompt "${promptName}":`, error);
+
+      return {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32603,
+          message:
+            error instanceof Error ? error.message : "Prompt generation error",
         },
       };
     }
