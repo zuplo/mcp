@@ -61,6 +61,10 @@
     "./tools/types": {
       "types": "./dist/tools/types.d.ts",
       "import": "./dist/tools/types.js"
+    },
+    "./openapi/types": {
+      "types": "./dist/openapi/types.d.ts",
+      "import": "./dist/openapi/types.js"
     }
   },
   "repository": {

@@ -37,6 +37,9 @@ import type {
   RegisteredTool,
 } from "./types.js";
 
+export const DEFAULT_MCP_SERVER_NAME = "MCP Server";
+export const DEFAULT_MCP_SERVER_VERSION = "0.0.0";
+
 export class MCPServer {
   private capabilities: ServerCapabilities;
   private tools: Map<string, RegisteredTool> = new Map();
@@ -46,8 +49,8 @@ export class MCPServer {
   private logger: Logger;
 
   constructor(options: MCPServerOptions) {
-    this.name = options.name || "MCP Server";
-    this.version = options.version || "1.0.0";
+    this.name = options.name || DEFAULT_MCP_SERVER_NAME;
+    this.version = options.version || DEFAULT_MCP_SERVER_VERSION;
     this.instructions = options.instructions || undefined;
     this.logger = options.logger || createDefaultLogger();
 
