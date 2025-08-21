@@ -62,6 +62,10 @@
       "types": "./dist/tools/types.d.ts",
       "import": "./dist/tools/types.js"
     },
+    "./prompts": {
+      "types": "./dist/prompts/index.d.ts",
+      "import": "./dist/prompts/index.js"
+    },
     "./openapi/types": {
       "types": "./dist/openapi/types.d.ts",
       "import": "./dist/openapi/types.js"
