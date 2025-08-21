@@ -38,9 +38,9 @@ export interface ExtensionMcpServer {
   version: string;
 
   /**
-   * Array of tool metadata in the server
+   * Optional: array of tool metadata in the server
    */
-  tools: ExtensionMcpServerTool[];
+  tools?: ExtensionMcpServerTool[];
 }
 
 /**
