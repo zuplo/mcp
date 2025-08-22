@@ -1,8 +1,10 @@
+import { ErrorCode } from "../jsonrpc2/consts.js";
+import { newJSONRPCError } from "../jsonrpc2/types.js";
 import type {
   JSONRPCMessage,
   JSONRPCRequest,
   JSONRPCResponse,
-} from "../jsonrpc2/types.ts";
+} from "../jsonrpc2/types.js";
 import { isJSONRPCRequest, isJSONRPCResponse } from "../jsonrpc2/validation.js";
 import { createDefaultLogger } from "../logger/index.js";
 import type { Logger } from "../logger/types.js";
@@ -178,14 +180,13 @@ export class HTTPStreamableTransport implements Transport {
   public async handleRequest(request: Request): Promise<Response> {
     if (!this.connected) {
       return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: {
+        JSON.stringify(
+          newJSONRPCError({
             code: -32000,
             message: "Transport not connected",
-          },
-          id: null,
-        }),
+            id: null,
+          })
+        ),
         {
           status: 503,
           headers: { "Content-Type": "application/json" },
@@ -195,14 +196,13 @@ export class HTTPStreamableTransport implements Transport {
 
     if (!this.messageHandler) {
       return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: {
+        JSON.stringify(
+          newJSONRPCError({
             code: -32000,
             message: "No message handler registered",
-          },
-          id: null,
-        }),
+            id: null,
+          })
+        ),
         {
           status: 500,
           headers: { "Content-Type": "application/json" },
@@ -250,22 +250,19 @@ export class HTTPStreamableTransport implements Transport {
     } catch (error) {
       this.logger.error("Error handling request:", error);
 
-      // Determine appropriate status code
-      const status = 400;
-
-      const errorResponse = {
-        jsonrpc: "2.0",
-        error: {
-          code: -32603, // Internal error
-          message: error || "Server error",
-        },
-        id: null,
-      };
-
-      return new Response(JSON.stringify(errorResponse), {
-        status,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify(
+          newJSONRPCError({
+            code: ErrorCode.InternalError,
+            message: "Internal server error",
+            id: null,
+          })
+        ),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
   }
 
@@ -288,15 +285,14 @@ export class HTTPStreamableTransport implements Transport {
        * a stateless mode) and through the legacy SSE streams.
        */
       return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: {
-            code: -32600,
+        JSON.stringify(
+          newJSONRPCError({
+            code: ErrorCode.InvalidRequest,
             message:
               "Not Acceptable: Client must accept application/json and text/event-stream",
-          },
-          id: null,
-        }),
+            id: null,
+          })
+        ),
         {
           status: 406,
           headers: { "Content-Type": "application/json" },
@@ -308,11 +304,13 @@ export class HTTPStreamableTransport implements Transport {
     const messages = await this.extractJSONRPC(request);
     if (!messages || (Array.isArray(messages) && messages.length === 0)) {
       return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: { code: -32700, message: "Parse error" },
-          id: null,
-        }),
+        JSON.stringify(
+          newJSONRPCError({
+            code: ErrorCode.ParseError,
+            message: "Parse error: received invalid JSON",
+            id: null,
+          })
+        ),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -423,11 +421,13 @@ export class HTTPStreamableTransport implements Transport {
       return new Response(stream.readable, { headers });
     } catch (error) {
       return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: { code: -32603, message: error || "Internal error" },
-          id: null,
-        }),
+        JSON.stringify(
+          newJSONRPCError({
+            code: ErrorCode.InternalError,
+            message: "Internal server error",
+            id: null,
+          })
+        ),
         {
           status: 500,
           headers: { "Content-Type": "application/json" },
@@ -455,11 +455,13 @@ export class HTTPStreamableTransport implements Transport {
     // If no session and sessions are required, reject
     if (this.options.enableSessions && !session) {
       return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: { code: -32000, message: "Session required" },
-          id: null,
-        }),
+        JSON.stringify(
+          newJSONRPCError({
+            code: ErrorCode.InvalidRequest,
+            message: "Session ID required",
+            id: null,
+          })
+        ),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },

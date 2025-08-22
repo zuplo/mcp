@@ -16,6 +16,12 @@ import { z } from "zod/v4";
 
 /**
  * A uniquely identifying ID established by the client for a request / response
- * object in JSON-RPC
+ * object in JSON-RPC.
+ *
  */
 export const IdSchema = z.union([z.string(), z.number().int()]);
+
+/**
+ * In cases of parsing errors, the ID must be set to null.
+ */
+export const ErrorIdSchema = z.union([IdSchema, z.null()]);

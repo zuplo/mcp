@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import type { JSONRPCRequest } from "../jsonrpc2/types.js";
+import { type JSONRPCRequest, newJSONRPCRequest } from "../jsonrpc2/types.js";
 import type {
   GetPromptResult,
   ListPromptsResult,
@@ -68,12 +68,11 @@ describe("MCPServer Prompts", () => {
 
   describe("prompts/list request", () => {
     it("returns empty list when no prompts are registered", async () => {
-      const request: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const request: JSONRPCRequest = newJSONRPCRequest({
         id: 1,
         method: "prompts/list",
         params: {},
-      };
+      });
 
       const response = await server.handleRequest(request);
 
@@ -98,12 +97,11 @@ describe("MCPServer Prompts", () => {
 
       server.addPrompt(promptConfig);
 
-      const request: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const request = newJSONRPCRequest({
         id: 1,
         method: "prompts/list",
         params: {},
-      };
+      });
 
       const response = await server.handleRequest(request);
 
@@ -141,8 +139,7 @@ describe("MCPServer Prompts", () => {
     });
 
     it("generates prompt with valid arguments", async () => {
-      const request: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const request = newJSONRPCRequest({
         id: 1,
         method: "prompts/get",
         params: {
@@ -151,7 +148,7 @@ describe("MCPServer Prompts", () => {
             name: "Alice",
           },
         },
-      };
+      });
 
       const response = await server.handleRequest(request);
 
@@ -171,15 +168,14 @@ describe("MCPServer Prompts", () => {
     });
 
     it("returns error for non-existent prompt", async () => {
-      const request: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const request = newJSONRPCRequest({
         id: 1,
         method: "prompts/get",
         params: {
           name: "non-existent",
           arguments: {},
         },
-      };
+      });
 
       const response = await server.handleRequest(request);
 
@@ -195,8 +191,7 @@ describe("MCPServer Prompts", () => {
     });
 
     it("returns error for invalid arguments", async () => {
-      const request: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const request = newJSONRPCRequest({
         id: 1,
         method: "prompts/get",
         params: {
@@ -205,7 +200,7 @@ describe("MCPServer Prompts", () => {
             // missing required 'name' argument
           },
         },
-      };
+      });
 
       const response = await server.handleRequest(request);
 

@@ -1,4 +1,5 @@
-import type { JSONRPCRequest } from "../jsonrpc2/types.js";
+import { JSONRPC_VERSION } from "../jsonrpc2/consts.js";
+import { type JSONRPCRequest, newJSONRPCRequest } from "../jsonrpc2/types.js";
 import { MCPServer } from "./index.js";
 
 describe("MCPServer", () => {
@@ -9,16 +10,15 @@ describe("MCPServer", () => {
         version: "0.0.0",
       });
 
-      const pingRequest: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const pingRequest: JSONRPCRequest = newJSONRPCRequest({
         id: "123",
         method: "ping",
-      };
+      });
 
       const response = await server.handleRequest(pingRequest);
 
       expect(response).toBeDefined();
-      expect(response.jsonrpc).toBe("2.0");
+      expect(response.jsonrpc).toBe(JSONRPC_VERSION);
       expect(response.id).toBe("123");
 
       if ("result" in response) {
