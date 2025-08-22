@@ -1,10 +1,13 @@
 import { z } from "zod/v4";
-import type {
-  JSONRPCError,
-  JSONRPCMessage,
-  JSONRPCNotification,
-  JSONRPCRequest,
-  JSONRPCResponse,
+import { ErrorCode } from "../jsonrpc2/consts.js";
+import {
+  type JSONRPCError,
+  type JSONRPCMessage,
+  type JSONRPCNotification,
+  type JSONRPCRequest,
+  type JSONRPCResponse,
+  newJSONRPCError,
+  newJSONRPCReponse,
 } from "../jsonrpc2/types.js";
 import {
   isJSONRPCNotification,
@@ -95,15 +98,11 @@ export class MCPServer {
 
         // Send error response for requests
         if (isJSONRPCRequest(message)) {
-          const errorResponse: JSONRPCError = {
-            jsonrpc: "2.0",
+          const errorResponse = newJSONRPCError({
             id: message.id,
-            error: {
-              code: -32603,
-              message:
-                error instanceof Error ? error.message : "Internal error",
-            },
-          };
+            code: ErrorCode.InternalError,
+            message: error instanceof Error ? error.message : "Internal error",
+          });
 
           await transport.send(errorResponse);
           return errorResponse;
@@ -261,27 +260,21 @@ export class MCPServer {
           return this.handlePromptGetRequest(request);
         default:
           // Method not found
-          return {
-            jsonrpc: "2.0",
+          return newJSONRPCError({
             id: request.id,
-            error: {
-              code: -32601,
-              message: `Method "${request.method}" not found`,
-            },
-          };
+            code: ErrorCode.MethodNotFound,
+            message: `Method "${request.method}" not found`,
+          });
       }
     } catch (error) {
       this.logger.error("Error handling request:", error);
 
       // Internal error
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32603,
-          message: error instanceof Error ? error.message : "Internal error",
-        },
-      };
+        code: ErrorCode.InternalError,
+        message: error instanceof Error ? error.message : "Internal error",
+      });
     }
   }
 
@@ -298,11 +291,7 @@ export class MCPServer {
    * Handle ping request - the server MUST respond with an empty request.
    */
   private handlePing(request: JSONRPCRequest): JSONRPCResponse | JSONRPCError {
-    return {
-      jsonrpc: "2.0",
-      id: request.id,
-      result: {},
-    };
+    return newJSONRPCReponse({ id: request.id, result: {} });
   }
 
   /**
@@ -316,15 +305,13 @@ export class MCPServer {
     if (!parseResult.success) {
       const treeErrors = z.treeifyError(parseResult.error);
       const prettyErrors = z.prettifyError(parseResult.error);
-      return {
-        jsonrpc: "2.0",
+
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32602,
-          message: `Invalid request parameters: ${prettyErrors}`,
-          data: treeErrors,
-        },
-      };
+        code: ErrorCode.InvalidParams,
+        message: `Invalid request parameters: ${prettyErrors}`,
+        data: treeErrors,
+      });
     }
 
     const protocolVersion = parseResult.data.params.protocolVersion;
@@ -344,24 +331,17 @@ export class MCPServer {
           ...(this.instructions ? { instructions: this.instructions } : {}),
         };
 
-        return {
-          jsonrpc: "2.0",
-          id: request.id,
-          result: initResponse,
-        };
+        return newJSONRPCReponse({ id: request.id, result: initResponse });
       }
       default: {
-        return {
-          jsonrpc: "2.0",
+        return newJSONRPCError({
           id: request.id,
-          error: {
-            code: -32602,
-            message: `Unsupported protocol version: ${protocolVersion} - supported versions: ${SUPPORTED_PROTOCOL_VERSIONS}`,
-            data: {
-              supportedVersions: SUPPORTED_PROTOCOL_VERSIONS,
-            },
+          code: ErrorCode.InvalidParams,
+          message: `Unsupported protocol version: ${protocolVersion} - supported versions: ${SUPPORTED_PROTOCOL_VERSIONS}`,
+          data: {
+            supportedVersions: SUPPORTED_PROTOCOL_VERSIONS,
           },
-        };
+        });
       }
     }
   }
@@ -381,11 +361,10 @@ export class MCPServer {
       tools: toolsArray,
     };
 
-    return {
-      jsonrpc: "2.0",
+    return newJSONRPCReponse({
       id: request.id,
       result: toolList,
-    };
+    });
   }
 
   /**
@@ -400,14 +379,12 @@ export class MCPServer {
         "Could not validate tool call:",
         validatedToolCall.error
       );
-      return {
-        jsonrpc: "2.0",
+
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32600,
-          message: `Invalid request ${validatedToolCall.error}`,
-        },
-      };
+        code: ErrorCode.InvalidRequest,
+        message: `Invalid request ${validatedToolCall.error}`,
+      });
     }
 
     const toolCallReq = validatedToolCall.data;
@@ -415,30 +392,24 @@ export class MCPServer {
 
     const tool = this.tools.get(toolName);
     if (!tool) {
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32601,
-          message: `Tool "${toolName}" not found`,
-        },
-      };
+        code: ErrorCode.InvalidParams,
+        message: `Tool "${toolName}" not found`,
+      });
     }
 
     const rawArgs = toolCallReq.params.arguments ?? {};
     const validation = tool.validator.parse(rawArgs);
     if (!validation.success) {
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32602,
-          message: validation.errorMessage
-            ? `Invalid arguments for tool '${toolName}': ${validation.errorMessage}`
-            : `Invalid arguments for tool '${toolName}'`,
-          data: validation.errorData,
-        },
-      };
+        code: ErrorCode.InvalidParams,
+        message: validation.errorMessage
+          ? `Invalid arguments for tool '${toolName}': ${validation.errorMessage}`
+          : `Invalid arguments for tool '${toolName}'`,
+        data: validation.errorData,
+      });
     }
 
     // Execute the tool
@@ -448,23 +419,19 @@ export class MCPServer {
       const data = validation.data as object;
       const result = await tool.handler(data);
 
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCReponse({
         id: request.id,
         result: result,
-      };
+      });
     } catch (error) {
       this.logger.error(`Error executing tool "${toolName}":`, error);
 
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32603,
-          message:
-            error instanceof Error ? error.message : "Tool execution error",
-        },
-      };
+        code: ErrorCode.InternalError,
+        message:
+          error instanceof Error ? error.message : "Tool execution error",
+      });
     }
   }
 
@@ -479,15 +446,12 @@ export class MCPServer {
     if (!parseResult.success) {
       const treeErrors = z.treeifyError(parseResult.error);
       const prettyErrors = z.prettifyError(parseResult.error);
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32602,
-          message: `Invalid request parameters: ${prettyErrors}`,
-          data: treeErrors,
-        },
-      };
+        code: ErrorCode.InvalidParams,
+        message: `Invalid request parameters: ${prettyErrors}`,
+        data: treeErrors,
+      });
     }
 
     const promptsArray = Array.from(this.prompts.values()).map(
@@ -498,11 +462,10 @@ export class MCPServer {
       prompts: promptsArray,
     };
 
-    return {
-      jsonrpc: "2.0",
+    return newJSONRPCReponse({
       id: request.id,
       result,
-    };
+    });
   }
 
   /**
@@ -516,46 +479,37 @@ export class MCPServer {
     if (!parseResult.success) {
       const treeErrors = z.treeifyError(parseResult.error);
       const prettyErrors = z.prettifyError(parseResult.error);
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32602,
-          message: `Invalid request parameters: ${prettyErrors}`,
-          data: treeErrors,
-        },
-      };
+        code: ErrorCode.InvalidParams,
+        message: `Invalid request parameters: ${prettyErrors}`,
+        data: treeErrors,
+      });
     }
 
     const promptName = parseResult.data.params.name;
     const prompt = this.prompts.get(promptName);
 
     if (!prompt) {
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32602,
-          message: `Prompt "${promptName}" not found`,
-        },
-      };
+        code: ErrorCode.InvalidParams,
+        message: `Prompt "${promptName}" not found`,
+      });
     }
 
     const rawArgs = parseResult.data.params.arguments ?? {};
     const validation = prompt.validator.parse(rawArgs);
 
     if (!validation.success) {
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32602,
-          message: validation.errorMessage
-            ? `Invalid arguments for prompt '${promptName}': ${validation.errorMessage}`
-            : `Invalid arguments for prompt '${promptName}'`,
-          data: validation.errorData,
-        },
-      };
+        code: ErrorCode.InvalidParams,
+        message: validation.errorMessage
+          ? `Invalid arguments for prompt '${promptName}': ${validation.errorMessage}`
+          : `Invalid arguments for prompt '${promptName}'`,
+        data: validation.errorData,
+      });
     }
 
     try {
@@ -569,23 +523,19 @@ export class MCPServer {
         messages,
       };
 
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCReponse({
         id: request.id,
         result,
-      };
+      });
     } catch (error) {
       this.logger.error(`Error generating prompt "${promptName}":`, error);
 
-      return {
-        jsonrpc: "2.0",
+      return newJSONRPCError({
         id: request.id,
-        error: {
-          code: -32603,
-          message:
-            error instanceof Error ? error.message : "Prompt generation error",
-        },
-      };
+        code: ErrorCode.InternalError,
+        message:
+          error instanceof Error ? error.message : "Prompt generation error",
+      });
     }
   }
 

@@ -1,4 +1,4 @@
-import type { JSONRPCRequest } from "../jsonrpc2/types.js";
+import { type JSONRPCRequest, newJSONRPCRequest } from "../jsonrpc2/types.js";
 import type { InitializeResult } from "../mcp/20250326/types.js";
 import {
   LATEST_PROTOCOL_VERSION,
@@ -16,8 +16,7 @@ describe("MCPServer", () => {
         version: serverVersion,
       });
 
-      const clientReq: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const clientReq = newJSONRPCRequest({
         id: 0,
         method: "initialize",
         params: {
@@ -33,7 +32,7 @@ describe("MCPServer", () => {
             version: "0.0.0",
           },
         },
-      };
+      });
 
       const response = await server.handleRequest(clientReq);
 
@@ -74,8 +73,7 @@ describe("MCPServer", () => {
         version: serverVersion,
       });
 
-      const clientReq: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const clientReq = newJSONRPCRequest({
         id: 0,
         method: "initialize",
         params: {
@@ -91,7 +89,7 @@ describe("MCPServer", () => {
             version: "0.0.0",
           },
         },
-      };
+      });
 
       const response = await server.handleRequest(clientReq);
 
@@ -133,8 +131,7 @@ describe("MCPServer", () => {
         version: serverVersion,
       });
 
-      const clientReq: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const clientReq = newJSONRPCRequest({
         id: 0,
         method: "initialize",
         params: {
@@ -150,7 +147,7 @@ describe("MCPServer", () => {
             version: "0.0.0",
           },
         },
-      };
+      });
 
       const response = await server.handleRequest(clientReq);
 
@@ -176,8 +173,7 @@ describe("MCPServer", () => {
         version: serverVersion,
       });
 
-      const clientReq: JSONRPCRequest = {
-        jsonrpc: "2.0",
+      const clientReq = newJSONRPCRequest({
         id: 0,
         method: "initialize",
         params: {
@@ -193,7 +189,7 @@ describe("MCPServer", () => {
             version: "0.0.0",
           },
         },
-      };
+      });
 
       const response = await server.handleRequest(clientReq);
 

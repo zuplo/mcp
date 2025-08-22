@@ -14,7 +14,7 @@
 
 import { z } from "zod/v4";
 import { JSONRPC_VERSION } from "../consts.js";
-import { IdSchema } from "./id.js";
+import { ErrorIdSchema } from "./id.js";
 
 /**
  * A response to a request that indicates an error occurred.
@@ -22,7 +22,7 @@ import { IdSchema } from "./id.js";
 export const JSONRPCErrorSchema = z
   .object({
     jsonrpc: z.literal(JSONRPC_VERSION),
-    id: IdSchema,
+    id: ErrorIdSchema,
     error: z.object({
       /**
        * The error type that occurred.

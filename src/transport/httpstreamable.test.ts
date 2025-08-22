@@ -1,3 +1,5 @@
+import { ErrorCode, JSONRPC_VERSION } from "../jsonrpc2/consts.js";
+import { newJSONRPCRequest } from "../jsonrpc2/types.js";
 import { MCPServer } from "../server/index.js";
 import { HTTPStreamableTransport } from "./httpstreamable.js";
 
@@ -25,11 +27,12 @@ describe("HTTPStreamableTransport Accept header validation", () => {
     return new Request("http://example.com/mcp", {
       method: "POST",
       headers,
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "ping",
-      }),
+      body: JSON.stringify(
+        newJSONRPCRequest({
+          id: 1,
+          method: "ping",
+        })
+      ),
     });
   };
 
@@ -40,8 +43,8 @@ describe("HTTPStreamableTransport Accept header validation", () => {
     expect(response.status).toBe(406);
 
     const responseBody = await response.json();
-    expect(responseBody.jsonrpc).toBe("2.0");
-    expect(responseBody.error.code).toBe(-32600);
+    expect(responseBody.jsonrpc).toBe(JSONRPC_VERSION);
+    expect(responseBody.error.code).toBe(ErrorCode.InvalidRequest);
     expect(responseBody.error.message).toContain("Not Acceptable");
     expect(responseBody.id).toBeNull();
   });
@@ -52,7 +55,7 @@ describe("HTTPStreamableTransport Accept header validation", () => {
 
     expect(response.status).toBe(406);
     const responseBody = await response.json();
-    expect(responseBody.error.code).toBe(-32600);
+    expect(responseBody.error.code).toBe(ErrorCode.InvalidRequest);
   });
 
   it("rejects requests with incompatible Accept header", async () => {
@@ -61,7 +64,7 @@ describe("HTTPStreamableTransport Accept header validation", () => {
 
     expect(response.status).toBe(406);
     const responseBody = await response.json();
-    expect(responseBody.error.code).toBe(-32600);
+    expect(responseBody.error.code).toBe(ErrorCode.InvalidRequest);
   });
 
   it("accepts requests with application/json Accept header", async () => {
