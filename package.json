@@ -1,6 +1,6 @@
 {
   "name": "@zuplo/mcp",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "A fetch API based, remote server first, TypeScript SDK for MCP.",
   "type": "module",
   "scripts": {
