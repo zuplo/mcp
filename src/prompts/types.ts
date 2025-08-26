@@ -1,8 +1,4 @@
-import type {
-  Prompt,
-  PromptArgument,
-  PromptMessage,
-} from "../mcp/20250618/types.js";
+import type { Prompt, PromptMessage } from "../mcp/20250618/types.js";
 import type { InputParamValidator, ParsedData } from "../server/types.js";
 
 /**
@@ -37,16 +33,6 @@ export interface PromptConfig<V extends InputParamValidator<unknown>> {
    * Function that generates prompt messages from validated arguments
    */
   generator: PromptGenerator<V>;
-
-  /**
-   * A list of arguments to use for templating the prompt
-   */
-  arguments?: PromptArgument[];
-
-  /**
-   * Optional metadata
-   */
-  _meta?: Record<string, unknown>;
 }
 
 /**

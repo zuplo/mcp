@@ -29,6 +29,7 @@ import type {
   ListPromptsResult,
   ListToolsResult,
   Prompt,
+  PromptArgument,
   ServerCapabilities,
   Tool,
 } from "../mcp/20250618/types.js";
@@ -191,20 +192,28 @@ export class MCPServer {
   public addPrompt<V extends InputParamValidator<unknown>>(
     config: PromptConfig<V>
   ): void {
-    const {
-      name,
-      validator,
-      generator,
-      description,
-      arguments: promptArguments,
-      _meta,
-    } = config;
+    const { name, validator, generator, description } = config;
+
+    // Extract "arguments" from the validator's JSON schema
+    // be be used as the broadcasted arguments
+    const jsonSchema = validator.jsonSchema as Tool["inputSchema"];
+    let promptArguments: PromptArgument[] | undefined;
+
+    if (jsonSchema.properties && typeof jsonSchema.properties === "object") {
+      const requiredFields = new Set(jsonSchema.required || []);
+      promptArguments = Object.entries(jsonSchema.properties).map(
+        ([propName, propSchema]: [string, { description?: string }]) => ({
+          name: propName,
+          description: propSchema.description ?? `Prompt for ${propName}`,
+          required: requiredFields.has(propName),
+        })
+      );
+    }
 
     const promptSchema: Prompt = {
       name,
-      ...(description && { description }),
+      description,
       ...(promptArguments && { arguments: promptArguments }),
-      ...(_meta && { _meta }),
     };
 
     const registered: RegisteredPrompt = {
