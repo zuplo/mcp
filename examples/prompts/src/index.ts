@@ -27,21 +27,9 @@ server.addPrompt({
   validator: new ZodValidator(
     z.object({
       name: z.string().describe("The name of the person to greet"),
-      style: z.enum(["formal", "casual", "friendly"]).optional().describe("The greeting style")
+      style: z.enum(["formal", "casual", "friendly"]).optional().describe("The greeting style (formal, casual, friendly)")
     })
   ),
-  arguments: [
-    {
-      name: "name",
-      description: "The name of the person to greet",
-      required: true,
-    },
-    {
-      name: "style",
-      description: "The greeting style (formal, casual, friendly)",
-      required: false,
-    }
-  ],
   generator: ({ name, style = "friendly" }) => {
     const greetings = {
       formal: `Good day, ${name}. I hope this message finds you well.`,
@@ -60,27 +48,10 @@ server.addPrompt({
   validator: new ZodValidator(
     z.object({
       code: z.string().describe("The code to review"),
-      language: z.string().optional().describe("Programming language"),
-      focus: z.string().optional().describe("Specific areas to focus on")
+      language: z.string().optional().describe("Programming language (e.g., typescript, python)"),
+      focus: z.string().optional().describe("Specific areas to focus on (e.g., performance, security, readability)")
     })
   ),
-  arguments: [
-    {
-      name: "code",
-      description: "The code to review",
-      required: true,
-    },
-    {
-      name: "language",
-      description: "Programming language (e.g., typescript, python)",
-      required: false,
-    },
-    {
-      name: "focus",
-      description: "Specific areas to focus on (e.g., performance, security, readability)",
-      required: false,
-    }
-  ],
   generator: ({ code, language, focus }) => {
     let reviewText = "Please review this code";
 
@@ -121,23 +92,6 @@ server.addPrompt({
       date: z.string().describe("Meeting date")
     })
   ),
-  arguments: [
-    {
-      name: "meeting_title",
-      description: "Title of the meeting",
-      required: true,
-    },
-    {
-      name: "attendees",
-      description: "Comma-separated list of attendees",
-      required: true,
-    },
-    {
-      name: "date",
-      description: "Meeting date",
-      required: true,
-    }
-  ],
   generator: (args) => {
     const templateMessages = [
       newTextPromptMessage("user", `Please help me create a summary for the meeting titled "{{meeting_title}}" that took place on {{date}} with attendees: {{attendees}}.
@@ -163,21 +117,9 @@ server.addPrompt({
   validator: new ZodValidator(
     z.object({
       error_message: z.string().describe("The error message or issue description"),
-      technology: z.string().optional().describe("Technology stack involved")
+      technology: z.string().optional().describe("Technology stack (e.g., React, Node.js, Python)")
     })
   ),
-  arguments: [
-    {
-      name: "error_message",
-      description: "The error message or issue description",
-      required: true,
-    },
-    {
-      name: "technology",
-      description: "Technology stack (e.g., React, Node.js, Python)",
-      required: false,
-    }
-  ],
   generator: ({ error_message, technology }) => {
     const messages = [
       newTextPromptMessage("user", `I'm encountering an issue${technology ? ` with ${technology}` : ""}: ${error_message}`),
