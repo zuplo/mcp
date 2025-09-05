@@ -20,27 +20,27 @@ import { LoggingMessageNotificationSchema } from "./logging.schema.js";
 import {
   CancelledNotificationSchema,
   ProgressNotificationSchema,
-} from "./notifications.schema";
-import { PingRequestSchema } from "./ping.schema";
+} from "./notifications.schema.js";
+import { PingRequestSchema } from "./ping.schema.js";
 import {
   GetPromptResultSchema,
   ListPromptsResultSchema,
   PromptListChangedNotificationSchema,
-} from "./prompt.schema";
+} from "./prompt.schema.js";
 import {
   ListResourceTemplatesResultSchema,
   ListResourcesResultSchema,
   ReadResourceResultSchema,
   ResourceListChangedNotificationSchema,
   ResourceUpdatedNotificationSchema,
-} from "./resource.schema";
-import { ListRootsRequestSchema } from "./roots.schema";
-import { CreateMessageRequestSchema } from "./sampling.schema";
+} from "./resource.schema.js";
+import { ListRootsRequestSchema } from "./roots.schema.js";
+import { CreateMessageRequestSchema } from "./sampling.schema.js";
 import {
   CallToolResultSchema,
   ListToolsResultSchema,
   ToolListChangedNotificationSchema,
-} from "./tools.schema";
+} from "./tools.schema.js";
 
 /**
  * Server request unions

@@ -1,0 +1,13 @@
+{
+  "name": "@zuplo/mcp import spec types example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rm -rf ./dist/ && rm -rf ./node_modules/"
+  },
+  "dependencies": {
+    "@zuplo/mcp": "file:../../../"
+  }
+}

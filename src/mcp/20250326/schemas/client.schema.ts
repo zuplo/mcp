@@ -14,32 +14,35 @@
 
 import { z } from "zod/v4";
 import { EmptyResultSchema } from "./../../../jsonrpc2/schemas/response.js";
-import { CompleteRequestSchema } from "./autocomplete.schema";
-import { InitializeRequestSchema } from "./initialize.schema";
-import { SetLevelRequestSchema } from "./logging.schema";
+import { CompleteRequestSchema } from "./autocomplete.schema.js";
+import { InitializeRequestSchema } from "./initialize.schema.js";
+import { SetLevelRequestSchema } from "./logging.schema.js";
 import {
   CancelledNotificationSchema,
   InitializedNotificationSchema,
   ProgressNotificationSchema,
-} from "./notifications.schema";
-import { PingRequestSchema } from "./ping.schema";
+} from "./notifications.schema.js";
+import { PingRequestSchema } from "./ping.schema.js";
 import {
   GetPromptRequestSchema,
   ListPromptsRequestSchema,
-} from "./prompt.schema";
+} from "./prompt.schema.js";
 import {
   ListResourceTemplatesRequestSchema,
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
   SubscribeRequestSchema,
   UnsubscribeRequestSchema,
-} from "./resource.schema";
+} from "./resource.schema.js";
 import {
   ListRootsResultSchema,
   RootsListChangedNotificationSchema,
-} from "./roots.schema";
-import { CreateMessageResultSchema } from "./sampling.schema";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "./tools.schema";
+} from "./roots.schema.js";
+import { CreateMessageResultSchema } from "./sampling.schema.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "./tools.schema.js";
 
 /**
  * Client requests union

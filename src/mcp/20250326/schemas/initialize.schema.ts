@@ -21,8 +21,8 @@ import { ResultSchema } from "../../../jsonrpc2/schemas/response.js";
 import {
   ClientCapabilitiesSchema,
   ServerCapabilitiesSchema,
-} from "./capabilities.schema";
-import { ImplementationSchema } from "./implementation.schema";
+} from "./capabilities.schema.js";
+import { ImplementationSchema } from "./implementation.schema.js";
 
 /**
  * This request is sent from the client to the server when it first connects,

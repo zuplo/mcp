@@ -1,0 +1,15 @@
+{
+  "name": "@zuplo/mcp example prompts server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rm -rf ./dist/ && rm -rf ./node_modules/"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.1",
+    "@zuplo/mcp": "file:../../../",
+    "hono": "^4.7.9"
+  }
+}
