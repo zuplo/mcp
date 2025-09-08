@@ -62,4 +62,9 @@ export interface Transport {
    * Set a session ID for subsequent requests
    */
   setSessionId(sessionId: string | undefined): void;
+
+  /**
+   * Set custom headers for requests
+   */
+  setHeaders(headers: Record<string, string>): void;
 }
