@@ -4,12 +4,14 @@
     "declaration": true,
     "esModuleInterop": true,
     "lib": ["ESNext", "WebWorker", "Webworker.Iterable"],
-    "module": "ES2022",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "target": "ES2022",
+    "moduleResolution": "NodeNext",
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
     "baseUrl": ".",
+    "isolatedModules": true,
     "paths": {
       "@zuplo/mcp/*": ["./src/*"]
     }
