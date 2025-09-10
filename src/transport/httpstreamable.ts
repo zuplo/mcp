@@ -48,12 +48,17 @@ export class HTTPStreamableTransport implements Transport {
   messageHandler: MessageHandler | null = null;
   closeCallback: (() => void) | null = null;
 
+  private headers: Record<string, string>;
   private options: TransportOptions;
   private connected = false;
   private enableStreaming = false;
   private sessions: Map<string, Session> = new Map();
   private streams: Map<string, StreamInfo> = new Map();
   private logger: Logger;
+
+  setHeaders(headers: Record<string, string>): void {
+    this.headers = { ...this.headers, ...headers };
+  }
 
   constructor(options: TransportOptions = {}, streamable = false) {
     // Set defaults
@@ -62,6 +67,12 @@ export class HTTPStreamableTransport implements Transport {
       enableSessions: false,
       ...options,
     };
+
+    this.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
     this.logger = options.logger || createDefaultLogger();
 
     // Start session cleanup timer if sessions are enabled
@@ -189,7 +200,7 @@ export class HTTPStreamableTransport implements Transport {
         ),
         {
           status: 503,
-          headers: { "Content-Type": "application/json" },
+          headers: this.headers,
         }
       );
     }
@@ -205,7 +216,7 @@ export class HTTPStreamableTransport implements Transport {
         ),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: this.headers,
         }
       );
     }
@@ -260,7 +271,7 @@ export class HTTPStreamableTransport implements Transport {
         ),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: this.headers,
         }
       );
     }
@@ -295,7 +306,7 @@ export class HTTPStreamableTransport implements Transport {
         ),
         {
           status: 406,
-          headers: { "Content-Type": "application/json" },
+          headers: this.headers,
         }
       );
     }
@@ -313,7 +324,7 @@ export class HTTPStreamableTransport implements Transport {
         ),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: this.headers,
         }
       );
     }
@@ -347,9 +358,10 @@ export class HTTPStreamableTransport implements Transport {
         }
         return new Response(null, {
           status: 202,
-          headers: currentSession
-            ? { "Mcp-Session-Id": currentSession.id }
-            : undefined,
+          headers: {
+            ...this.headers,
+            ...(currentSession && { "Mcp-Session-Id": currentSession.id }),
+          },
         });
       }
 
@@ -373,17 +385,12 @@ export class HTTPStreamableTransport implements Transport {
 
         // Return a direct JSON response
         const responseBody = responses.length === 1 ? responses[0] : responses;
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-        };
-
-        if (currentSession) {
-          headers["Mcp-Session-Id"] = currentSession.id;
-        }
-
         return new Response(JSON.stringify(responseBody), {
           status: 200,
-          headers,
+          headers: {
+            ...this.headers,
+            ...(currentSession && { "Mcp-Session-Id": currentSession.id }),
+          },
         });
       }
 
@@ -407,18 +414,15 @@ export class HTTPStreamableTransport implements Transport {
         }
       }
 
-      const headers: Record<string, string> = {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      };
-
-      if (currentSession) {
-        headers["Mcp-Session-Id"] = currentSession.id;
-      }
-
       // Let responses be handled by the message handler and sent to the stream
-      return new Response(stream.readable, { headers });
+      return new Response(stream.readable, {
+        headers: {
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+          ...this.headers,
+          ...(currentSession && { "Mcp-Session-Id": currentSession.id }),
+        },
+      });
     } catch (error) {
       return new Response(
         JSON.stringify(
@@ -430,7 +434,7 @@ export class HTTPStreamableTransport implements Transport {
         ),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: this.headers,
         }
       );
     }
@@ -441,19 +445,19 @@ export class HTTPStreamableTransport implements Transport {
    */
   private async handleGetRequest(
     request: Request,
-    session?: Session
+    currentSession?: Session
   ): Promise<Response> {
     // Check Accept header as required by the spec
     const acceptHeader = request.headers.get("Accept") || "";
     if (!acceptHeader.includes("text/event-stream")) {
       return new Response(null, {
         status: 406, // Not Acceptable
-        headers: { "Content-Type": "application/json" },
+        headers: this.headers,
       });
     }
 
     // If no session and sessions are required, reject
-    if (this.options.enableSessions && !session) {
+    if (this.options.enableSessions && !currentSession) {
       return new Response(
         JSON.stringify(
           newJSONRPCError({
@@ -464,33 +468,29 @@ export class HTTPStreamableTransport implements Transport {
         ),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: this.headers,
         }
       );
     }
 
     // Create a new stream for server-to-client communication
-    const { stream, streamId } = this.createStream(session);
+    const { stream, streamId } = this.createStream(currentSession);
 
     // Check for Last-Event-ID for resumability
     const lastEventId = request.headers.get("Last-Event-ID");
-    if (lastEventId && session) {
+    if (lastEventId && currentSession) {
       // Replay messages if needed
-      await this.replayMessages(session, streamId, lastEventId);
+      await this.replayMessages(currentSession, streamId, lastEventId);
     }
 
-    // Return the stream
-    const headers: Record<string, string> = {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    };
-
-    if (session) {
-      headers["Mcp-Session-Id"] = session.id;
-    }
-
-    return new Response(stream.readable, { headers });
+    return new Response(stream.readable, {
+      headers: {
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        ...this.headers,
+        ...(currentSession && { "Mcp-Session-Id": currentSession.id }),
+      },
+    });
   }
 
   /**

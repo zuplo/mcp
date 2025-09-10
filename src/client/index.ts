@@ -18,7 +18,7 @@ import type {
   Tool,
 } from "../mcp/20250618/types.js";
 import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
-import type { Transport } from "../transport/types.js";
+import type { Transport, TransportOptions } from "../transport/types.js";
 import type { MCPClientOptions } from "./types.js";
 
 export const DEFAULT_MCP_CLIENT_NAME = "MCP Client";
@@ -34,11 +34,13 @@ export class MCPClient {
   private protocolVersion?: string;
   private logger: Logger;
   private requestId = 1;
+  private transportOptions: TransportOptions;
 
   constructor(options: MCPClientOptions = {}) {
     this.name = options.name || DEFAULT_MCP_CLIENT_NAME;
     this.version = options.version || DEFAULT_MCP_CLIENT_VERSION;
     this.logger = options.logger || createDefaultLogger();
+    this.transportOptions = options.transportOptions || {};
     this.capabilities = {
       experimental: {},
       sampling: {},
@@ -50,6 +52,9 @@ export class MCPClient {
    * Connect to an MCP server using the provided transport
    */
   public async connect(transport: Transport): Promise<void> {
+    if (this.transportOptions.headers) {
+      transport.setHeaders(this.transportOptions.headers);
+    }
     this.transport = transport;
     await transport.connect();
   }

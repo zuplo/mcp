@@ -45,6 +45,10 @@ export class HTTPClientTransport implements Transport {
     }
   }
 
+  setHeaders(headers: Record<string, string>): void {
+    this.headers = { ...this.headers, ...headers };
+  }
+
   async connect(): Promise<void> {
     try {
       new URL(this.url);
@@ -79,7 +83,10 @@ export class HTTPClientTransport implements Transport {
 
       const response = await this.fetch(this.url, {
         method: "POST",
-        headers: requestHeaders,
+        headers: {
+          ...this.headers,
+          ...(this.sessionId && { "Mcp-Session-Id": this.sessionId }),
+        },
         body: JSON.stringify(message),
         signal: controller.signal,
       });
