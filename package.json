@@ -7,7 +7,7 @@
     "build": "tsc",
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest",
     "lint": "npx @biomejs/biome@1.9.4 check src/",
-    "lint:fix": "npx @biomejs/biome@1.9.4 check src/ --fix",
+    "lint:fix": "npx @biomejs/biome@1.9.4 check src/ --fix && prettier format . --write",
     "lint:fix-unsafe": "npx @biomejs/biome@1.9.4 check src/ --fix --unsafe",
     "format": "npx @biomejs/biome@1.9.4 format src/ --write"
   },
@@ -93,6 +93,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.14",
     "jest": "^29.7.0",
+    "prettier": "^3.6.2",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

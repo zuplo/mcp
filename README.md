@@ -51,20 +51,20 @@ server.addTool({
   validator: new ZodValidator(
     z.object({
       a: z.number().describe("First number"),
-      b: z.number().describe("Second number")
-    })
+      b: z.number().describe("Second number"),
+    }),
   ),
   handler: async ({ a, b }) => ({
     content: [{ type: "text", text: String(a + b) }],
     isError: false,
-  })
+  }),
 });
 ```
 
 3. Wire up your MCP server with a transport:
 
 ```ts
-const transport = new HTTPStreamableTransport()
+const transport = new HTTPStreamableTransport();
 await transport.connect();
 
 server.withTransport(transport);
