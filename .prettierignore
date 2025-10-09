@@ -1,0 +1,8 @@
+*.ts
+*.mts
+*.js
+*.cjs
+*.mjs
+*.css
+*.json
+*.jsonc
