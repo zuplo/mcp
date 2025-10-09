@@ -14,27 +14,24 @@ jobs:
       id-token: write
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 22.x
-        cache: npm
-        registry-url: https://registry.npmjs.org
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+          registry-url: https://registry.npmjs.org
 
-    - run: npm ci
-    - run: npm run build
+      - run: npm ci
+      - run: npm run build
 
-    - name: Publish to NPM
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.PUBLIC_NPM_REGISTRY_TOKEN }}
-      run: npm publish --access public
-
-    - name: Publish to GitHub Packages
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        npm config set //npm.pkg.github.com/:_authToken "$NODE_AUTH_TOKEN"
-        npm publish --registry https://npm.pkg.github.com
+      - name: Publish to NPM
+        run: npm publish --access public
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm config set //npm.pkg.github.com/:_authToken "$NODE_AUTH_TOKEN"
+          npm publish --registry https://npm.pkg.github.com
