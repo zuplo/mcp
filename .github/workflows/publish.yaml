@@ -3,6 +3,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  id-token: write  # Required for OIDC - https://docs.npmjs.com/trusted-publishers
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -14,16 +18,17 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22.x
           cache: npm
           registry-url: https://registry.npmjs.org
 
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npm run build
 
