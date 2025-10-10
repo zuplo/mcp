@@ -21,12 +21,19 @@ import {
   GetPromptRequestSchema,
   ListPromptsRequestSchema,
 } from "../mcp/20250618/schemas/prompt.schema.js";
+import {
+  ListResourceTemplatesRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
+} from "../mcp/20250618/schemas/resource.schema.js";
 import { CallToolRequestSchema } from "../mcp/20250618/schemas/tools.schema.js";
 import type {
   CallToolResult,
   GetPromptResult,
   InitializeResult,
   ListPromptsResult,
+  ListResourceTemplatesResult,
+  ListResourcesResult,
   ListToolsResult,
   Prompt,
   PromptArgument,
@@ -41,6 +48,12 @@ import {
   SUPPORTED_PROTOCOL_VERSIONS,
 } from "../mcp/versions.js";
 import type { PromptConfig, RegisteredPrompt } from "../prompts/types.js";
+import type {
+  RegisteredResourceOrTemplate,
+  ResourceMetadata,
+  ResourceReader,
+  URITemplate,
+} from "../resources/types.js";
 import type { ToolConfig } from "../tools/types.js";
 import type { Transport } from "../transport/types.js";
 import type {
@@ -56,6 +69,7 @@ export class MCPServer {
   private capabilities: ServerCapabilities;
   private tools: Map<string, RegisteredTool> = new Map();
   private prompts: Map<string, RegisteredPrompt> = new Map();
+  private resources: Map<string, RegisteredResourceOrTemplate> = new Map();
   private name: string;
   private version: string;
   private instructions: string | undefined;
@@ -248,6 +262,89 @@ export class MCPServer {
   }
 
   /**
+   * Add a resource to the server
+   */
+  public addResource(
+    name: string,
+    uri: string | URITemplate,
+    metadata: ResourceMetadata,
+    reader: ResourceReader
+  ): void {
+    if (typeof uri === "string") {
+      const resource = {
+        name,
+        uri,
+        ...metadata,
+      };
+
+      const registered: RegisteredResourceOrTemplate = {
+        type: "resource",
+        resource,
+        reader,
+      };
+
+      this.resources.set(name, registered);
+    } else {
+      const template = {
+        name,
+        uriTemplate: uri.template,
+        ...metadata,
+      };
+
+      const registered: RegisteredResourceOrTemplate = {
+        type: "template",
+        template,
+        reader,
+      };
+
+      this.resources.set(name, registered);
+    }
+  }
+
+  /**
+   * Remove a resource from the server
+   */
+  public removeResource(name: string): boolean {
+    return this.resources.delete(name);
+  }
+
+  /**
+   * Get a specific resource by name
+   */
+  public getResource(name: string) {
+    const registered = this.resources.get(name);
+    if (!registered) return undefined;
+    return registered.type === "resource" ? registered.resource : undefined;
+  }
+
+  /**
+   * Get a specific resource template by name
+   */
+  public getResourceTemplate(name: string) {
+    const registered = this.resources.get(name);
+    if (!registered) return undefined;
+    return registered.type === "template" ? registered.template : undefined;
+  }
+
+  /**
+   * Get all registered resources (non-templates)
+   */
+  public getResourceDefinitions() {
+    return Array.from(this.resources.values())
+      .filter((r) => r.type === "resource")
+      .map((r) => r.resource);
+  }
+
+  /**
+   * Get all registered resource templates
+   */
+  public getResourceTemplateDefinitions() {
+    return Array.from(this.resources.values())
+      .filter((r) => r.type === "template")
+      .map((r) => r.template);
+  }
+
+  /**
    * Handle a JSON-RPC request
    */
   public async handleRequest(
@@ -267,6 +364,12 @@ export class MCPServer {
           return this.handlePromptListRequest(request);
         case "prompts/get":
           return this.handlePromptGetRequest(request);
+        case "resources/list":
+          return this.handleResourceListRequest(request);
+        case "resources/templates/list":
+          return this.handleResourceTemplateListRequest(request);
+        case "resources/read":
+          return this.handleResourceReadRequest(request);
         default:
           // Method not found
           return newJSONRPCError({
@@ -554,6 +657,132 @@ export class MCPServer {
   private updateAvailableTools(): void {
     if (this.capabilities.tools) {
       this.capabilities.tools.available = Array.from(this.tools.keys());
+    }
+  }
+
+  /**
+   * Handle resources/list request
+   */
+  private async handleResourceListRequest(
+    request: JSONRPCRequest
+  ): Promise<JSONRPCResponse | JSONRPCError> {
+    const parseResult = ListResourcesRequestSchema.safeParse(request);
+
+    if (!parseResult.success) {
+      const treeErrors = z.treeifyError(parseResult.error);
+      const prettyErrors = z.prettifyError(parseResult.error);
+      return newJSONRPCError({
+        id: request.id,
+        code: ErrorCode.InvalidParams,
+        message: `Invalid request parameters: ${prettyErrors}`,
+        data: treeErrors,
+      });
+    }
+
+    const resourcesArray = Array.from(this.resources.values())
+      .filter((r) => r.type === "resource")
+      .map((r) => r.resource);
+
+    const result: ListResourcesResult = {
+      resources: resourcesArray,
+    };
+
+    return newJSONRPCReponse({
+      id: request.id,
+      result,
+    });
+  }
+
+  /**
+   * Handle resources/templates/list request
+   */
+  private async handleResourceTemplateListRequest(
+    request: JSONRPCRequest
+  ): Promise<JSONRPCResponse | JSONRPCError> {
+    const parseResult = ListResourceTemplatesRequestSchema.safeParse(request);
+
+    if (!parseResult.success) {
+      const treeErrors = z.treeifyError(parseResult.error);
+      const prettyErrors = z.prettifyError(parseResult.error);
+      return newJSONRPCError({
+        id: request.id,
+        code: ErrorCode.InvalidParams,
+        message: `Invalid request parameters: ${prettyErrors}`,
+        data: treeErrors,
+      });
+    }
+
+    const templatesArray = Array.from(this.resources.values())
+      .filter((r) => r.type === "template")
+      .map((r) => r.template);
+
+    const result: ListResourceTemplatesResult = {
+      resourceTemplates: templatesArray,
+    };
+
+    return newJSONRPCReponse({
+      id: request.id,
+      result,
+    });
+  }
+
+  /**
+   * Handle resources/read request
+   */
+  private async handleResourceReadRequest(
+    request: JSONRPCRequest
+  ): Promise<JSONRPCResponse | JSONRPCError> {
+    const parseResult = ReadResourceRequestSchema.safeParse(request);
+
+    if (!parseResult.success) {
+      const treeErrors = z.treeifyError(parseResult.error);
+      const prettyErrors = z.prettifyError(parseResult.error);
+      return newJSONRPCError({
+        id: request.id,
+        code: ErrorCode.InvalidParams,
+        message: `Invalid request parameters: ${prettyErrors}`,
+        data: treeErrors,
+      });
+    }
+
+    const uri = parseResult.data.params.uri;
+
+    function matchesTemplate(uri: string, template: string): boolean {
+      // matches URI {variable} directly via regex
+      const regexPattern = template.replace(/\{[^}]+\}/g, "([^/]+)");
+      const regex = new RegExp(`^${regexPattern}$`);
+      return regex.test(uri);
+    }
+
+    const resourceOrTemplate = Array.from(this.resources.values()).find(
+      (r) =>
+        (r.type === "resource" && r.resource.uri === uri) ||
+        (r.type === "template" && matchesTemplate(uri, r.template.uriTemplate))
+    );
+
+    if (!resourceOrTemplate) {
+      return newJSONRPCError({
+        id: request.id,
+        code: ErrorCode.ResourceNotFound,
+        message: `Resource not found: ${uri}`,
+        data: { uri },
+      });
+    }
+
+    try {
+      const result = await resourceOrTemplate.reader(uri);
+      return newJSONRPCReponse({
+        id: request.id,
+        result,
+      });
+    } catch (error) {
+      this.logger.error(`Error reading resource "${uri}":`, error);
+      return newJSONRPCError({
+        id: request.id,
+        code: ErrorCode.ResourceNotFound,
+        message: error instanceof Error ? error.message : "Resource not found",
+        data: { uri },
+      });
     }
   }
 }

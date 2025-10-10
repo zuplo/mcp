@@ -8,8 +8,8 @@
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest",
     "lint": "npx @biomejs/biome@1.9.4 check src/",
     "lint:fix": "npx @biomejs/biome@1.9.4 check src/ --fix && prettier format . --write",
-    "lint:fix-unsafe": "npx @biomejs/biome@1.9.4 check src/ --fix --unsafe",
-    "format": "npx @biomejs/biome@1.9.4 format src/ --write"
+    "lint:fix-unsafe": "npx @biomejs/biome@1.9.4 check src/ --fix --unsafe && prettier format . --write",
+    "format": "npx @biomejs/biome@1.9.4 format src/ --write && prettier format . --write"
   },
   "files": [
     "dist/**/**",
@@ -73,6 +73,10 @@
     "./prompts": {
       "types": "./dist/prompts/index.d.ts",
       "import": "./dist/prompts/index.js"
+    },
+    "./resources": {
+      "types": "./dist/resources/index.d.ts",
+      "import": "./dist/resources/index.js"
     },
     "./openapi/types": {
       "types": "./dist/openapi/types.d.ts",
