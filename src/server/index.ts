@@ -88,6 +88,7 @@ export class MCPServer {
         available: [],
       },
       prompts: {},
+      resources: {},
       ...options.capabilities,
     };
   }

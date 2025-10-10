@@ -4,7 +4,7 @@ on:
     types: [published]
 
 permissions:
-  id-token: write  # Required for OIDC - https://docs.npmjs.com/trusted-publishers
+  id-token: write # Required for OIDC - https://docs.npmjs.com/trusted-publishers
   contents: read
 
 jobs:
