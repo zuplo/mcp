@@ -53,6 +53,7 @@ describe("MCPServer", () => {
             available: [],
           },
           prompts: {},
+          resources: {},
         });
 
         // Verify server info is correctly included
@@ -110,6 +111,7 @@ describe("MCPServer", () => {
             available: [],
           },
           prompts: {},
+          resources: {},
         });
 
         // Verify server info is correctly included
