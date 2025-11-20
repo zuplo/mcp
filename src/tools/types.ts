@@ -18,6 +18,6 @@ export interface ToolConfig<
   handler: (params: ParsedData<V>) => Promise<R> | R;
   description?: string;
   outputSchema?: Tool["outputSchema"];
-  annotation?: Tool["annotations"];
+  annotations?: Tool["annotations"];
   _meta?: Tool["_meta"];
 }

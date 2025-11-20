@@ -52,8 +52,8 @@ server.addTool({
   validator: new ZodValidator(
     z.object({})
   ),
-  annotation: {
-    readOnlyHint: true,
+  annotations: {
+    readOnlyHint: true
   },
   _meta: {
     "openai/outputTemplate": "ui://widget/todo.html",

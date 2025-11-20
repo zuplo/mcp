@@ -162,7 +162,7 @@ export class MCPServer {
       handler,
       description = `Execute the ${name} tool`,
       outputSchema,
-      annotation,
+      annotations,
       _meta,
     } = config;
 
@@ -171,7 +171,7 @@ export class MCPServer {
       description,
       inputSchema: validator.jsonSchema as Tool["inputSchema"],
       ...(outputSchema && { outputSchema }),
-      ...(annotation && { annotations: annotation }),
+      ...(annotations && { annotations }),
       ...(_meta && { _meta }),
     };
 
