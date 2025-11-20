@@ -52,7 +52,7 @@ server.addTool({
   validator: new ZodValidator(
     z.object({})
   ),
-  annotation: {
+  annotations: {
     readOnlyHint: true,
   },
   _meta: {

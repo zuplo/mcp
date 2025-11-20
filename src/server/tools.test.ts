@@ -328,7 +328,7 @@ describe("MCPServer Tools", () => {
 
     it("both methods work with tools that have annotations", () => {
       const toolName = "annotated-tool";
-      const annotation = {
+      const annotations = {
         title: "Annotated Tool",
         readOnlyHint: true,
         destructiveHint: false,
@@ -346,16 +346,16 @@ describe("MCPServer Tools", () => {
           content: [{ type: "text", text: "annotation test" }],
           isError: false,
         }),
-        annotation,
+        annotations,
       });
 
       // Test getTool
       const singleTool = server.getTool(toolName);
-      expect(singleTool?.annotations).toEqual(annotation);
+      expect(singleTool?.annotations).toEqual(annotations);
 
       // Test getTools
       const allTools = server.getTools();
-      expect(allTools.get(toolName)?.annotations).toEqual(annotation);
+      expect(allTools.get(toolName)?.annotations).toEqual(annotations);
     });
 
     it("both methods work with tools that have _meta", () => {
