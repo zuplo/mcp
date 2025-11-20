@@ -1,5 +1,5 @@
 {
-  "name": "@zuplo/mcp example zod validator tool",
+  "name": "@zuplo/mcp-example-zod-validator-tool",
   "private": true,
   "type": "module",
   "scripts": {

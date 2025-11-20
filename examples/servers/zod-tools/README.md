@@ -25,11 +25,11 @@ or curl:
 curl -X POST \
   -H 'Accept: application/json' \
   -d '{
-    method: "tools/call"
-    params:{
-      name: "echo"
-      arguments:{
-        input: "hello"
+    "method": "tools/call"
+    "params":{
+      "name": "echo"
+      "arguments": {
+        "input": "hello"
       }
     }
   }' \

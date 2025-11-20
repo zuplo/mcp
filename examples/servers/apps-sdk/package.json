@@ -1,5 +1,5 @@
 {
-  "name": "@zuplo/mcp-examples-openai-apps-sdk",
+  "name": "@zuplo/mcp-examples-openai-apps-sdk-server",
   "private": true,
   "type": "module",
   "scripts": {

@@ -24,7 +24,7 @@ or curl:
 
 ```sh
 curl -X POST \
-  -H 'Accept: application/json' \
+  -H "Accept: application/json" \
   -d '{
     "method": "tools/list",
     "params": {}

@@ -26,12 +26,12 @@ or curl:
 
 ```sh
 curl -X POST \
-  -H 'Accept: application/json' \
+  -H "Accept: application/json" \
   -d '{
-    method: "tools/call"
-    params:{
-      name: "say_hello"
-      arguments:{}
+    "method": "tools/call"
+    "params":{
+      "name": "say_hello"
+      "arguments": {}
     }
   }' \
   localhost:3000/mcp

@@ -27,7 +27,7 @@ or curl:
 
 ```sh
 curl -X POST \
-  -H 'Accept: application/json' \
+  -H "Accept: application/json" \
   -d '{
     "jsonrpc": "2.0",
     "id": "123",

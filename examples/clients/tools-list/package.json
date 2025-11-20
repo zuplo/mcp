@@ -1,5 +1,5 @@
 {
-  "name": "@zuplo/mcp example tool list client",
+  "name": "@zuplo/mcp-example-tool-list-client",
   "private": true,
   "type": "module",
   "scripts": {
