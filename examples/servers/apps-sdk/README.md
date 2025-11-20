@@ -26,7 +26,7 @@ or curl:
 curl -X POST \
   -H 'Accept: application/json' \
   -d '{
-    "method": "tools/list"
+    "method": "tools/list",
     "params": {}
   }' \
   localhost:3000/mcp
