@@ -1,5 +1,5 @@
 {
-  "name": "@zuplo/mcp import spec types example",
+  "name": "@zuplo/mcp-import-spec-types-example",
   "private": true,
   "type": "module",
   "scripts": {

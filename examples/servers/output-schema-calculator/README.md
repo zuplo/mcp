@@ -26,12 +26,12 @@ or curl:
 curl -X POST \
   -H 'Accept: application/json' \
   -d '{
-    method: "tools/call"
-    params:{
-      name: "add"
-      arguments:{
-        a: 1
-        b: 2
+    "method": "tools/call"
+    "params": {
+      "name": "add"
+      "arguments": {
+        "a": 1
+        "b": 2
       }
     }
   }' \

@@ -1,5 +1,5 @@
 {
-  "name": "@zuplo/mcp example resources server",
+  "name": "@zuplo/mcp-example-resources-server",
   "private": true,
   "type": "module",
   "scripts": {

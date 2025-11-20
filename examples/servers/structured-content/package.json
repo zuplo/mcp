@@ -1,5 +1,5 @@
 {
-  "name": "@zuplo/mcp example tools server",
+  "name": "@zuplo/mcp-example-structured-content-server",
   "private": true,
   "type": "module",
   "scripts": {
