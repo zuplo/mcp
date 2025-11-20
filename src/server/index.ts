@@ -162,6 +162,8 @@ export class MCPServer {
       handler,
       description = `Execute the ${name} tool`,
       outputSchema,
+      annotation,
+      _meta,
     } = config;
 
     const toolSchema: Tool = {
@@ -169,6 +171,8 @@ export class MCPServer {
       description,
       inputSchema: validator.jsonSchema as Tool["inputSchema"],
       ...(outputSchema && { outputSchema }),
+      ...(annotation && { annotations: annotation }),
+      ...(_meta && { _meta }),
     };
 
     const registered: RegisteredTool = {

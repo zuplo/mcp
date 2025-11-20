@@ -325,5 +325,66 @@ describe("MCPServer Tools", () => {
       const allTools = server.getTools();
       expect(allTools.get(toolName)?.outputSchema).toEqual(outputSchema);
     });
+
+    it("both methods work with tools that have annotations", () => {
+      const toolName = "annotated-tool";
+      const annotation = {
+        title: "Annotated Tool",
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      };
+
+      server.addTool({
+        name: toolName,
+        validator: new CustomValidator(
+          { type: "object", properties: {} },
+          () => ({ success: true, data: {}, errorData: null })
+        ),
+        handler: async () => ({
+          content: [{ type: "text", text: "annotation test" }],
+          isError: false,
+        }),
+        annotation,
+      });
+
+      // Test getTool
+      const singleTool = server.getTool(toolName);
+      expect(singleTool?.annotations).toEqual(annotation);
+
+      // Test getTools
+      const allTools = server.getTools();
+      expect(allTools.get(toolName)?.annotations).toEqual(annotation);
+    });
+
+    it("both methods work with tools that have _meta", () => {
+      const toolName = "meta-tool";
+      const meta = {
+        foo: "bar",
+        baz: 123,
+      };
+
+      server.addTool({
+        name: toolName,
+        validator: new CustomValidator(
+          { type: "object", properties: {} },
+          () => ({ success: true, data: {}, errorData: null })
+        ),
+        handler: async () => ({
+          content: [{ type: "text", text: "meta test" }],
+          isError: false,
+        }),
+        _meta: meta,
+      });
+
+      // Test getTool
+      const singleTool = server.getTool(toolName);
+      expect(singleTool?._meta).toEqual(meta);
+
+      // Test getTools
+      const allTools = server.getTools();
+      expect(allTools.get(toolName)?._meta).toEqual(meta);
+    });
   });
 });
