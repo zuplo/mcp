@@ -53,7 +53,7 @@ server.addTool({
     z.object({})
   ),
   annotations: {
-    readOnlyHint: true
+    readOnlyHint: true,
   },
   _meta: {
     "openai/outputTemplate": "ui://widget/todo.html",
