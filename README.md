@@ -18,15 +18,7 @@
 
 ---
 
-🚧 Warning! In active development! 🚧
-
-**Attributions**
-
-Inspired by (with MIT Licensed attributions) - [`modelcontextprotocol/typescript-sdk`](https://github.com/modelcontextprotocol/typescript-sdk)
-
-# 🚀 About
-
-`@zuplo/mcp` is a remote server first MCP SDK that aims to be ["minimum common API" compliant as defined by the WinterTC](https://min-common-api.proposal.wintertc.org/).
+`@zuplo/mcp` is a stateless, remote server first MCP SDK that aims to be ["minimum common API" compliant as defined by the WinterTC](https://min-common-api.proposal.wintertc.org/).
 It uses the [`fetch` APIs](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and is intended to work out of the box on Zuplo, Node, Deno, Workerd, etc.
 
 # 📝 Documentation
@@ -79,3 +71,7 @@ const response = await transport.handleRequest(httpRequest);
 # 🤝 Contributing
 
 See the [`CONTRIBUTING.md`](./CONTRIBUTING.md) for further details.
+
+**Attributions**
+
+Inspired by, with MIT Licensed attributions to, the official [`modelcontextprotocol/typescript-sdk`](https://github.com/modelcontextprotocol/typescript-sdk)
