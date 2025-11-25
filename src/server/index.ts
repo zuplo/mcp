@@ -534,7 +534,7 @@ export class MCPServer {
       // upcast here since we are sure that the json schema object has been
       // validated and "data" should be some sort of object.
       const data = validation.data as object;
-      const result = await tool.handler(data);
+      const result = await tool.handler(data, toolCallReq.params._meta);
 
       return newJSONRPCReponse({
         id: request.id,

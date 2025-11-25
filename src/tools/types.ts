@@ -15,7 +15,7 @@ export interface ToolConfig<
 > {
   name: string;
   validator: V;
-  handler: (params: ParsedData<V>) => Promise<R> | R;
+  handler: (params: ParsedData<V>, _meta?: object) => Promise<R> | R;
   description?: string;
   outputSchema?: Tool["outputSchema"];
   annotations?: Tool["annotations"];
