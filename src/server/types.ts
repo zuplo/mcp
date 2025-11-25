@@ -58,7 +58,10 @@ export type RegisteredTool<
 > = {
   tool: Tool;
   validator: V;
-  handler: (params: ParsedData<V>) => Promise<CallToolResult> | CallToolResult;
+  handler: (
+    params: ParsedData<V>,
+    _meta?: object
+  ) => Promise<CallToolResult> | CallToolResult;
 };
 
 /**

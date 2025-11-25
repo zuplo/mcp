@@ -64,10 +64,11 @@ server.addTool({
     return {
       content: [
         {
-          type: "text", text: `Current todos: ${JSON.stringify(todos)}`
+          type: "text", text: `Current todos: ${JSON.stringify(todos.filter((todo) => !todo.completed))}`
         }
       ],
-      structuredContent: { tasks: todos },
+      structuredContent: { todos: todos.filter((todo) => !todo.completed) },
+      _meta: { state: todos },
       isError: false,
     }
   }
@@ -96,7 +97,8 @@ server.addTool({
           type: "text", text: `Added todo ${title}`
         }
       ],
-      structuredContent: { tasks: todos },
+      structuredContent: { todos: todos.filter((todo) => !todo.completed) },
+      _meta: { state: todos },
       isError: false,
     }
   }
@@ -121,6 +123,8 @@ server.addTool({
     if (!todo) {
       return {
         content: [{ type: "text", text: "Error: could not find todo" }],
+        structuredContent: { todos: todos.filter((todo) => !todo.completed) },
+        _meta: { state: todos },
         isError: true,
       };
     }
@@ -131,6 +135,8 @@ server.addTool({
 
     return {
       content: [{ type: "text", text: `Completed ${todo.title}` }],
+      structuredContent: { todos: todos.filter((todo) => !todo.completed) },
+      _meta: { state: todos },
       isError: false,
     };
   }
