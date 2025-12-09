@@ -16,17 +16,17 @@ import {
 } from "../jsonrpc2/validation.js";
 import { createDefaultLogger } from "../logger/index.js";
 import type { Logger } from "../logger/types.js";
-import { InitializeRequestSchema } from "../mcp/20250618/schemas/initialize.schema.js";
+import { InitializeRequestSchema } from "../mcp/20251125/schemas/initialize.schema.js";
 import {
   GetPromptRequestSchema,
   ListPromptsRequestSchema,
-} from "../mcp/20250618/schemas/prompt.schema.js";
+} from "../mcp/20251125/schemas/prompt.schema.js";
 import {
   ListResourceTemplatesRequestSchema,
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
-} from "../mcp/20250618/schemas/resource.schema.js";
-import { CallToolRequestSchema } from "../mcp/20250618/schemas/tools.schema.js";
+} from "../mcp/20251125/schemas/resource.schema.js";
+import { CallToolRequestSchema } from "../mcp/20251125/schemas/tools.schema.js";
 import type {
   CallToolResult,
   GetPromptResult,
@@ -39,12 +39,13 @@ import type {
   PromptArgument,
   ServerCapabilities,
   Tool,
-} from "../mcp/20250618/types.js";
+} from "../mcp/20251125/types.js";
 import {
   LATEST_PROTOCOL_VERSION,
   PROTOCOL_VERSION_2024_10_07,
   PROTOCOL_VERSION_2024_11_05,
   PROTOCOL_VERSION_2025_03_26,
+  PROTOCOL_VERSION_2025_06_18,
   SUPPORTED_PROTOCOL_VERSIONS,
 } from "../mcp/versions.js";
 import type { PromptConfig, RegisteredPrompt } from "../prompts/types.js";
@@ -435,6 +436,7 @@ export class MCPServer {
 
     switch (protocolVersion) {
       case LATEST_PROTOCOL_VERSION:
+      case PROTOCOL_VERSION_2025_06_18:
       case PROTOCOL_VERSION_2025_03_26:
       case PROTOCOL_VERSION_2024_11_05:
       case PROTOCOL_VERSION_2024_10_07: {

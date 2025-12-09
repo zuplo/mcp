@@ -1,4 +1,4 @@
-import type { Prompt, PromptMessage } from "../mcp/20250618/types.js";
+import type { Prompt, PromptMessage } from "../mcp/20251125/types.js";
 import type { InputParamValidator, ParsedData } from "../server/types.js";
 
 /**

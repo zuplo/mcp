@@ -16,7 +16,7 @@ import type {
   ListToolsResult,
   Prompt,
   Tool,
-} from "../mcp/20250618/types.js";
+} from "../mcp/20251125/types.js";
 import { LATEST_PROTOCOL_VERSION } from "../mcp/versions.js";
 import type { Transport, TransportOptions } from "../transport/types.js";
 import type { MCPClientOptions } from "./types.js";
@@ -42,7 +42,6 @@ export class MCPClient {
     this.logger = options.logger || createDefaultLogger();
     this.transportOptions = options.transportOptions || {};
     this.capabilities = {
-      experimental: {},
       sampling: {},
       ...options.capabilities,
     };

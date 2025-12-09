@@ -3,7 +3,7 @@ import type {
   CallToolResult,
   ServerCapabilities,
   Tool,
-} from "../mcp/20250618/types.js";
+} from "../mcp/20251125/types.js";
 
 /**
  * InputParamValidatorReturn is the return type for the @type InputParamValidator

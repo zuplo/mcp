@@ -1,4 +1,4 @@
-import type { PromptMessage, TextContent } from "../mcp/20250618/types.js";
+import type { PromptMessage, TextContent } from "../mcp/20251125/types.js";
 
 /**
  * Simple template engine that replaces {{variable}} tokens with values
