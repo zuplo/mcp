@@ -3,7 +3,7 @@ import type {
   ListResourceTemplatesResult,
   ListResourcesResult,
   ReadResourceResult,
-} from "../mcp/20250618/types.js";
+} from "../mcp/20251125/types.js";
 import { MCPServer } from "./index.js";
 
 describe("MCPServer Resources", () => {

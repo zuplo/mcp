@@ -3,7 +3,7 @@ import type {
   ReadResourceResult,
   Resource,
   ResourceTemplate,
-} from "../mcp/20250618/types.js";
+} from "../mcp/20251125/types.js";
 
 export type ResourceReader = (
   uri: string

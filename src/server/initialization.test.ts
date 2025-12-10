@@ -1,5 +1,5 @@
-import { type JSONRPCRequest, newJSONRPCRequest } from "../jsonrpc2/types.js";
-import type { InitializeResult } from "../mcp/20250326/types.js";
+import { newJSONRPCRequest } from "../jsonrpc2/types.js";
+import type { InitializeResult } from "../mcp/20251125/types.js";
 import {
   LATEST_PROTOCOL_VERSION,
   PROTOCOL_VERSION_2025_03_26,
@@ -206,6 +206,7 @@ describe("MCPServer", () => {
         );
         expect(response.error.data).toEqual({
           supportedVersions: [
+            "2025-11-25",
             "2025-06-18",
             "2025-03-26",
             "2024-11-05",

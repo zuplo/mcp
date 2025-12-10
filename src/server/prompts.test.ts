@@ -3,7 +3,7 @@ import { type JSONRPCRequest, newJSONRPCRequest } from "../jsonrpc2/types.js";
 import type {
   GetPromptResult,
   ListPromptsResult,
-} from "../mcp/20250618/types.js";
+} from "../mcp/20251125/types.js";
 import { newTextPromptMessage } from "../prompts/templates.js";
 import { ZodValidator } from "../tools/zod.js";
 import { MCPServer } from "./index.js";
