@@ -42,10 +42,6 @@ import type {
 } from "../mcp/20251125/types.js";
 import {
   LATEST_PROTOCOL_VERSION,
-  PROTOCOL_VERSION_2024_10_07,
-  PROTOCOL_VERSION_2024_11_05,
-  PROTOCOL_VERSION_2025_03_26,
-  PROTOCOL_VERSION_2025_06_18,
   SUPPORTED_PROTOCOL_VERSIONS,
 } from "../mcp/versions.js";
 import type { PromptConfig, RegisteredPrompt } from "../prompts/types.js";
@@ -432,37 +428,27 @@ export class MCPServer {
       });
     }
 
-    const protocolVersion = parseResult.data.params.protocolVersion;
+    // The MCP spec defines that a server should attempt to negotiate
+    // the highest protocol version it supports:
+    // https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle#version-negotiation
+    const requestedVersion = parseResult.data.params.protocolVersion;
+    const negotiatedVersion = SUPPORTED_PROTOCOL_VERSIONS.includes(
+      requestedVersion
+    )
+      ? requestedVersion
+      : LATEST_PROTOCOL_VERSION;
 
-    switch (protocolVersion) {
-      case LATEST_PROTOCOL_VERSION:
-      case PROTOCOL_VERSION_2025_06_18:
-      case PROTOCOL_VERSION_2025_03_26:
-      case PROTOCOL_VERSION_2024_11_05:
-      case PROTOCOL_VERSION_2024_10_07: {
-        const initResponse: InitializeResult = {
-          protocolVersion: protocolVersion,
-          capabilities: this.getCapabilities(),
-          serverInfo: {
-            name: this.name,
-            version: this.version,
-          },
-          ...(this.instructions ? { instructions: this.instructions } : {}),
-        };
+    const initResponse: InitializeResult = {
+      protocolVersion: negotiatedVersion,
+      capabilities: this.getCapabilities(),
+      serverInfo: {
+        name: this.name,
+        version: this.version,
+      },
+      ...(this.instructions ? { instructions: this.instructions } : {}),
+    };
 
-        return newJSONRPCReponse({ id: request.id, result: initResponse });
-      }
-      default: {
-        return newJSONRPCError({
-          id: request.id,
-          code: ErrorCode.InvalidParams,
-          message: `Unsupported protocol version: ${protocolVersion} - supported versions: ${SUPPORTED_PROTOCOL_VERSIONS}`,
-          data: {
-            supportedVersions: SUPPORTED_PROTOCOL_VERSIONS,
-          },
-        });
-      }
-    }
+    return newJSONRPCReponse({ id: request.id, result: initResponse });
   }
 
   private async handleToolListRequest(
