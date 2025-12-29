@@ -165,9 +165,7 @@ describe("MCPServer", () => {
       }
     });
 
-    it("handles ill-supported MCP protocolVersion", async () => {
-      // should get an error JSON RPC 2 message if protocolVersion is something
-      // totally untenable like "2001-01-01"
+    it("negotiates unsupported protocolVersion to server's latest", async () => {
       const serverName = "example ping server";
       const serverVersion = "0.0.0";
       const server = new MCPServer({
@@ -179,7 +177,7 @@ describe("MCPServer", () => {
         id: 0,
         method: "initialize",
         params: {
-          protocolVersion: "2001-01-01",
+          protocolVersion: "2099-01-01",
           capabilities: {
             sampling: {},
             roots: {
@@ -199,22 +197,13 @@ describe("MCPServer", () => {
       expect(response.jsonrpc).toBe("2.0");
       expect(response.id).toBe(0);
 
-      if ("error" in response) {
-        expect(response.error.code).toBe(-32602);
-        expect(response.error.message).toContain(
-          "Unsupported protocol version"
-        );
-        expect(response.error.data).toEqual({
-          supportedVersions: [
-            "2025-11-25",
-            "2025-06-18",
-            "2025-03-26",
-            "2024-11-05",
-            "2024-10-07",
-          ],
-        });
+      if ("result" in response) {
+        const result = response.result as InitializeResult;
+        expect(result.protocolVersion).toBe(LATEST_PROTOCOL_VERSION);
+        expect(result.serverInfo.name).toBe(serverName);
+        expect(result.serverInfo.version).toBe(serverVersion);
       } else {
-        fail("Expected an error response, got a result");
+        fail("Expected a result response, got an error");
       }
     });
   });
