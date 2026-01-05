@@ -15,6 +15,7 @@ export interface ResourceMetadata {
   mimeType?: string;
   annotations?: Annotations;
   size?: number;
+  _meta?: Resource["_meta"];
 }
 
 export interface URITemplate {
