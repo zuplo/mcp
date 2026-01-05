@@ -29,6 +29,9 @@ server.addResource(
       audience: ["user" as const, "assistant" as const],
       priority: 0.8,
     },
+    _meta: {
+      foo: "bar"
+    }
   },
   async (uri) => ({
     contents: [
