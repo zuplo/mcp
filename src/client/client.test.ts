@@ -17,9 +17,10 @@ class MockTransport implements Transport {
   private messageHandler?: (
     message: JSONRPCMessage
   ) => Promise<JSONRPCMessage | null>;
-  private responses: Map<number, unknown> = new Map();
 
   async connect(): Promise<void> {}
+
+  setHeaders(_headers: Record<string, string>): void {}
 
   async send(message: JSONRPCMessage): Promise<void> {
     // Simulate response based on method
@@ -28,6 +29,10 @@ class MockTransport implements Transport {
       let response: JSONRPCResponse;
 
       switch (message.method) {
+        case "notifications/initialized":
+          // This is a notification, no response expected
+          return;
+
         case "initialize":
           response = newJSONRPCReponse({
             id,
@@ -130,13 +135,13 @@ class MockTransport implements Transport {
 
   async close(): Promise<void> {}
 
-  onError(callback: (error: Error) => void): void {}
+  onError(_callback: (error: Error) => void): void {}
 
   getSessionId(): string | undefined {
     return undefined;
   }
 
-  setSessionId(sessionId: string | undefined): void {}
+  setSessionId(_sessionId: string | undefined): void {}
 }
 
 describe("MCPClient", () => {

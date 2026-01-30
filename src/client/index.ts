@@ -33,8 +33,15 @@ export class MCPClient {
   private isInitialized = false;
   private protocolVersion?: string;
   private logger: Logger;
-  private requestId = 1;
+  private requestId = 0;
   private transportOptions: TransportOptions;
+  private pendingRequests = new Map<
+    number | string,
+    {
+      resolve: (value: JSONRPCResponse | JSONRPCError) => void;
+      reject: (error: Error) => void;
+    }
+  >();
 
   constructor(options: MCPClientOptions = {}) {
     this.name = options.name || DEFAULT_MCP_CLIENT_NAME;
@@ -55,11 +62,29 @@ export class MCPClient {
       transport.setHeaders(this.transportOptions.headers);
     }
     this.transport = transport;
+
+    // Set up a single, stable message handler that routes responses to pending requests
+    this.transport.onMessage(async (message) => {
+      if (
+        (isJSONRPCResponse(message) || isJSONRPCError(message)) &&
+        message.id !== undefined &&
+        message.id !== null
+      ) {
+        const pending = this.pendingRequests.get(message.id);
+        if (pending) {
+          this.pendingRequests.delete(message.id);
+          pending.resolve(message);
+        }
+      }
+      return null;
+    });
+
     await transport.connect();
   }
 
   /**
    * Initialize the connection with the server
+   * This conforms to https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle#initialization
    */
   public async initialize(
     protocolVersion = LATEST_PROTOCOL_VERSION
@@ -68,7 +93,8 @@ export class MCPClient {
       throw new Error("No transport connected. Call connect() first.");
     }
 
-    const request = newJSONRPCRequest({
+    // 1. Send initialize request
+    const initializeRequest = newJSONRPCRequest({
       id: this.requestId,
       method: "initialize",
       params: {
@@ -81,13 +107,20 @@ export class MCPClient {
       },
     });
 
-    const response = await this.sendRequest(request);
+    const initializeResponse = await this.sendRequest(initializeRequest);
 
-    if (isJSONRPCError(response)) {
-      throw new Error(`Initialization failed: ${response.error.message}`);
+    if (isJSONRPCError(initializeResponse)) {
+      throw new Error(`Initialization failed: ${initializeResponse.error.message}`);
     }
 
-    const result = response.result as InitializeResult;
+    // 2. Send notifications/initialized message (notification - no response expected)
+    const initializedNotification = newJSONRPCRequest({
+      id: this.requestId,
+      method: "notifications/initialized"
+    });
+    this.sendNotification(initializedNotification);
+
+    const result = initializeResponse.result as InitializeResult;
     this.isInitialized = true;
     this.protocolVersion = result.protocolVersion;
 
@@ -246,24 +279,25 @@ export class MCPClient {
     request: JSONRPCRequest
   ): Promise<JSONRPCResponse | JSONRPCError> {
     return new Promise((resolve, reject) => {
-      const requestId = request.id;
+      // Add request to pending map before sending
+      this.pendingRequests.set(request.id, { resolve, reject });
+      this.logger.debug(`sendRequest: ${JSON.stringify(request)} with id ${request.id}`);
 
-      // Set up a temporary message handler to capture the response
-      this.transport?.onMessage(async (message) => {
-        // Check if this is the response we're waiting for
-        if (
-          (isJSONRPCResponse(message) || isJSONRPCError(message)) &&
-          message.id === requestId
-        ) {
-          resolve(message);
-          return null;
-        }
-
-        return null;
+      this.transport?.send(request).catch((err) => {
+        this.pendingRequests.delete(request.id);
+        reject(err);
       });
 
-      // Send the request
-      this.transport?.send(request).catch(reject);
+      this.requestId++;
     });
+  }
+
+  private sendNotification(request: JSONRPCRequest): void {
+    // Fire and forget - notifications don't expect responses per JSON-RPC spec
+    // Don't await since SSE streams may stay open
+    this.transport?.send(request).catch((err) => {
+      this.logger.warn("Notification send error:", err);
+    });
+    this.requestId++;
   }
 }
