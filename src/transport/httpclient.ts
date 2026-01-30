@@ -90,7 +90,7 @@ export class HTTPClientTransport implements Transport {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      // Capture session ID from response headers if present 
+      // Capture session ID from response headers if present
       // (https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management)
       const responseSessionId = response.headers.get("Mcp-Session-Id");
       if (responseSessionId && !this.sessionId) {

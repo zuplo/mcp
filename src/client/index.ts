@@ -110,13 +110,15 @@ export class MCPClient {
     const initializeResponse = await this.sendRequest(initializeRequest);
 
     if (isJSONRPCError(initializeResponse)) {
-      throw new Error(`Initialization failed: ${initializeResponse.error.message}`);
+      throw new Error(
+        `Initialization failed: ${initializeResponse.error.message}`
+      );
     }
 
     // 2. Send notifications/initialized message (notification - no response expected)
     const initializedNotification = newJSONRPCRequest({
       id: this.requestId,
-      method: "notifications/initialized"
+      method: "notifications/initialized",
     });
     this.sendNotification(initializedNotification);
 
@@ -281,7 +283,9 @@ export class MCPClient {
     return new Promise((resolve, reject) => {
       // Add request to pending map before sending
       this.pendingRequests.set(request.id, { resolve, reject });
-      this.logger.debug(`sendRequest: ${JSON.stringify(request)} with id ${request.id}`);
+      this.logger.debug(
+        `sendRequest: ${JSON.stringify(request)} with id ${request.id}`
+      );
 
       this.transport?.send(request).catch((err) => {
         this.pendingRequests.delete(request.id);
