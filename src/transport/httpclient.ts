@@ -71,22 +71,17 @@ export class HTTPClientTransport implements Transport {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     try {
-      const requestHeaders = { ...this.headers };
-
-      // Add session ID header if available per MCP spec
-      if (this.sessionId) {
-        requestHeaders["Mcp-Session-Id"] = this.sessionId;
-      }
-
       const controller = new AbortController();
       timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
+      const requestHeaders = {
+        ...this.headers,
+        ...(this.sessionId && { "Mcp-Session-Id": this.sessionId }),
+      };
+
       const response = await this.fetch(this.url, {
         method: "POST",
-        headers: {
-          ...this.headers,
-          ...(this.sessionId && { "Mcp-Session-Id": this.sessionId }),
-        },
+        headers: requestHeaders,
         body: JSON.stringify(message),
         signal: controller.signal,
       });
@@ -95,12 +90,19 @@ export class HTTPClientTransport implements Transport {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
+      // Capture session ID from response headers if present 
+      // (https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management)
+      const responseSessionId = response.headers.get("Mcp-Session-Id");
+      if (responseSessionId && !this.sessionId) {
+        this.sessionId = responseSessionId;
+      }
+
       // Check content type to determine response format
       const contentType = response.headers.get("Content-Type") || "";
 
       if (contentType.includes("text/event-stream")) {
-        // Handle SSE response
-        await this.handleSSEResponse(response);
+        // Handle SSE response with abort signal for timeout
+        await this.handleSSEResponse(response, controller.signal);
       } else {
         // Handle JSON response
         await this.handleJSONResponse(response);
@@ -186,7 +188,10 @@ export class HTTPClientTransport implements Transport {
   /**
    * Handle SSE response from server
    */
-  private async handleSSEResponse(response: Response): Promise<void> {
+  private async handleSSEResponse(
+    response: Response,
+    signal?: AbortSignal
+  ): Promise<void> {
     if (!response.body) {
       throw new Error("SSE response has no body");
     }
@@ -219,6 +224,12 @@ export class HTTPClientTransport implements Transport {
 
     try {
       while (true) {
+        // Check if the abort signal has been triggered
+        if (signal?.aborted) {
+          await eventStream.cancel();
+          return;
+        }
+
         const { done, value } = await eventStream.read();
         if (done) {
           return;
@@ -227,6 +238,11 @@ export class HTTPClientTransport implements Transport {
         onEvent(value);
       }
     } catch (streamError) {
+      // Handle abort errors gracefully - these are expected when timeout fires
+      if (streamError instanceof Error && streamError.name === "AbortError") {
+        this.logger.debug("SSE stream aborted");
+        return;
+      }
       this.logger.error("Error processing SSE stream:", streamError);
       throw new Error(`SSE stream error: ${streamError}`);
     }
