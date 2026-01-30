@@ -94,7 +94,7 @@ export class HTTPClientTransport implements Transport {
       // (https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management)
       const responseSessionId = response.headers.get("Mcp-Session-Id");
       if (responseSessionId && !this.sessionId) {
-        this.sessionId = responseSessionId;
+        this.setSessionId(responseSessionId);
       }
 
       // Check content type to determine response format
