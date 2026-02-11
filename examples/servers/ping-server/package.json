@@ -10,6 +10,6 @@
   "dependencies": {
     "@hono/node-server": "^1.14.1",
     "@zuplo/mcp": "file:../../../",
-    "hono": "^4.7.9"
+    "hono": "^4.10.8"
   }
 }
