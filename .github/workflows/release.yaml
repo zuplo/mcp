@@ -4,6 +4,12 @@ on:
     tags:
       - "v*"
 
+# One in-flight release per tag. If the same tag is somehow pushed twice
+# (e.g. delete + recreate), serialize so they don't race.
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Build, test & create GitHub release
@@ -40,6 +46,10 @@ jobs:
         with:
           tag: ${{ github.ref_name }}
           generateReleaseNotes: true
+          # Update an existing release rather than failing — lets the
+          # workflow be re-run for a tag that already has a release
+          # (e.g. after fixing a publish failure).
+          allowUpdates: true
           # Use the GitHub App token (not GITHUB_TOKEN) so the release event
           # can trigger downstream workflows (e.g. publish.yaml).
           token: ${{ steps.app-token.outputs.token }}

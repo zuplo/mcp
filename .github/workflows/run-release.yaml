@@ -62,8 +62,30 @@ jobs:
           echo "next_version=$next" >> "$GITHUB_OUTPUT"
           echo "next_tag=v$next" >> "$GITHUB_OUTPUT"
 
+      # Fail early with a clear message if the target tag already exists
+      # remotely. Re-using a tag would silently overwrite an existing release.
+      - name: Verify tag does not already exist
+        env:
+          NEXT_TAG: ${{ steps.bump_tag.outputs.next_tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "$NEXT_TAG" > /dev/null 2>&1; then
+            echo "::error::Tag $NEXT_TAG already exists on origin. Delete it first if you intend to re-release."
+            exit 1
+          fi
+
       # Update package.json (no git tag — we tag manually below).
-      - run: npm version ${{ steps.bump_tag.outputs.next_version }} --no-git-tag-version
+      # Skip if it already matches (e.g. a prior failed run committed
+      # the bump but didn't push the tag).
+      - name: Bump package.json
+        env:
+          NEXT_VERSION: ${{ steps.bump_tag.outputs.next_version }}
+        run: |
+          current=$(node -p "require('./package.json').version")
+          if [ "$current" = "$NEXT_VERSION" ]; then
+            echo "package.json already at $NEXT_VERSION, skipping bump"
+          else
+            npm version "$NEXT_VERSION" --no-git-tag-version
+          fi
 
       - name: Commit & tag
         run: |
