@@ -63,10 +63,10 @@ jobs:
           echo "next_tag=v$next" >> "$GITHUB_OUTPUT"
 
       # Fail early with a clear message if the target tag already exists
-      # remotely. Without this check the workflow would still bump
-      # package.json and create a no-op commit, then die at the final
-      # `git push origin <tag>` with a confusing 'rejected: already exists'
-      # error. Catching it up front avoids the dirty intermediate state.
+      # remotely. Without this check the workflow would bump package.json,
+      # commit, push the commit to main, and then die at `git push origin
+      # <tag>` with a confusing 'rejected: already exists' error — leaving
+      # main with a version-bump commit that has no corresponding tag.
       - name: Verify tag does not already exist
         env:
           NEXT_TAG: ${{ steps.bump_tag.outputs.next_tag }}
