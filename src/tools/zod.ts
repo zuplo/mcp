@@ -5,12 +5,13 @@ import type {
 } from "../server/types.js";
 
 /**
- * ZodValidator is a input JSON params validator class which uses Zod and
- * @implements {InputParamValidator}
+ * ZodValidator is an input JSON params validator class that uses Zod to
+ * parse and validate tool call arguments.
  *
  * Accepts schemas built with either the regular `zod` API (chainable) or
  * the tree-shakable `zod/mini` API (functional).
  *
+ * @implements {InputParamValidator}
  * @param S - the Zod schema object. This is used to "parse" and provide
  * validated params to tool calls.
  */
