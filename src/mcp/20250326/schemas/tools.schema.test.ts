@@ -72,15 +72,15 @@ describe("CallToolResultSchema isError default", () => {
     content: [{ type: "text" as const, text: "hi" }],
   };
 
-  // The schema is `z.boolean().default(false).optional()` (chainable
-  // form) — wrapping a default in optional means the default does NOT
-  // kick in when the field is missing; the value is left as undefined.
-  // Locking that behavior in here so the upgrade branch has to match.
-  it("leaves isError undefined when the field is missing", () => {
+  // zod 4 changed default-with-optional semantics: defaults now apply
+  // even when wrapped in optional. The schema author's intent (per the
+  // "Default: false" doc) is finally realized.
+  // See https://zod.dev/v4/changelog#defaults-now-apply-within-optional-fields
+  it("supplies isError=false when the field is missing", () => {
     const r = CallToolResultSchema.safeParse(minimal);
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.isError).toBeUndefined();
+      expect(r.data.isError).toBe(false);
     }
   });
 
