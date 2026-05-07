@@ -12,33 +12,29 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { JSONRPC_VERSION } from "../consts.js";
 import { IdSchema } from "./id.js";
 
-export const ResultSchema = z
-  .object({
-    /**
-     * This result property is reserved by the protocol to allow clients and
-     * servers to attach additional metadata to their responses.
-     */
-    _meta: z.optional(z.object({}).loose()),
-  })
-  .loose();
+export const ResultSchema = z.looseObject({
+  /**
+   * This result property is reserved by the protocol to allow clients and
+   * servers to attach additional metadata to their responses.
+   */
+  _meta: z.optional(z.looseObject({})),
+});
 
 /* Empty result */
 /**
  * A response that indicates success but carries no data.
  */
-export const EmptyResultSchema = ResultSchema.strict();
+export const EmptyResultSchema = z.strictObject(ResultSchema.shape);
 
 /**
  * A successful (non-error) response to a request.
  */
-export const JSONRPCResponseSchema = z
-  .object({
-    jsonrpc: z.literal(JSONRPC_VERSION),
-    id: IdSchema,
-    result: ResultSchema,
-  })
-  .strict();
+export const JSONRPCResponseSchema = z.strictObject({
+  jsonrpc: z.literal(JSONRPC_VERSION),
+  id: IdSchema,
+  result: ResultSchema,
+});

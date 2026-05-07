@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { NotificationSchema } from "../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -40,102 +40,96 @@ import {
  * Clients should never make tool use decisions based on ToolAnnotations
  * received from untrusted servers.
  */
-export const ToolAnnotationsSchema = z
-  .object({
-    /**
-     * A human-readable title for the tool.
-     */
-    title: z.optional(z.string()),
+export const ToolAnnotationsSchema = z.looseObject({
+  /**
+   * A human-readable title for the tool.
+   */
+  title: z.optional(z.string()),
 
-    /**
-     * If true, the tool does not modify its environment.
-     *
-     * Default: false
-     */
-    readOnlyHint: z.optional(z.boolean()),
+  /**
+   * If true, the tool does not modify its environment.
+   *
+   * Default: false
+   */
+  readOnlyHint: z.optional(z.boolean()),
 
-    /**
-     * If true, the tool may perform destructive updates to its environment.
-     * If false, the tool performs only additive updates.
-     *
-     * (This property is meaningful only when `readOnlyHint == false`)
-     *
-     * Default: true
-     */
-    destructiveHint: z.optional(z.boolean()),
+  /**
+   * If true, the tool may perform destructive updates to its environment.
+   * If false, the tool performs only additive updates.
+   *
+   * (This property is meaningful only when `readOnlyHint == false`)
+   *
+   * Default: true
+   */
+  destructiveHint: z.optional(z.boolean()),
 
-    /**
-     * If true, calling the tool repeatedly with the same arguments
-     * will have no additional effect on the its environment.
-     *
-     * (This property is meaningful only when `readOnlyHint == false`)
-     *
-     * Default: false
-     */
-    idempotentHint: z.optional(z.boolean()),
+  /**
+   * If true, calling the tool repeatedly with the same arguments
+   * will have no additional effect on the its environment.
+   *
+   * (This property is meaningful only when `readOnlyHint == false`)
+   *
+   * Default: false
+   */
+  idempotentHint: z.optional(z.boolean()),
 
-    /**
-     * If true, this tool may interact with an "open world" of external
-     * entities. If false, the tool's domain of interaction is closed.
-     * For example, the world of a web search tool is open, whereas that
-     * of a memory tool is not.
-     *
-     * Default: true
-     */
-    openWorldHint: z.optional(z.boolean()),
-  })
-  .loose();
+  /**
+   * If true, this tool may interact with an "open world" of external
+   * entities. If false, the tool's domain of interaction is closed.
+   * For example, the world of a web search tool is open, whereas that
+   * of a memory tool is not.
+   *
+   * Default: true
+   */
+  openWorldHint: z.optional(z.boolean()),
+});
 
 /**
  * Definition for a tool the client can call.
  */
-export const ToolSchema = z
-  .object({
-    /**
-     * The name of the tool.
-     */
-    name: z.string(),
+export const ToolSchema = z.looseObject({
+  /**
+   * The name of the tool.
+   */
+  name: z.string(),
 
-    /**
-     * A human-readable description of the tool.
-     */
-    description: z.optional(z.string()),
+  /**
+   * A human-readable description of the tool.
+   */
+  description: z.optional(z.string()),
 
-    /**
-     * A JSON Schema object defining the expected parameters for the tool.
-     */
-    inputSchema: z
-      .object({
-        type: z.literal("object"),
-        properties: z.optional(z.object({}).loose()),
-      })
-      .loose(),
+  /**
+   * A JSON Schema object defining the expected parameters for the tool.
+   */
+  inputSchema: z.looseObject({
+    type: z.literal("object"),
+    properties: z.optional(z.looseObject({})),
+  }),
 
-    /**
-     * Optional additional tool information.
-     */
-    annotations: z.optional(ToolAnnotationsSchema),
-  })
-  .loose();
+  /**
+   * Optional additional tool information.
+   */
+  annotations: z.optional(ToolAnnotationsSchema),
+});
 
 /**
  * Sent from the client to request a list of tools the server has.
  */
-export const ListToolsRequestSchema = PaginatedRequestSchema.extend({
+export const ListToolsRequestSchema = z.extend(PaginatedRequestSchema, {
   method: z.literal("tools/list"),
 });
 
 /**
  * The server's response to a tools/list request from the client.
  */
-export const ListToolsResultSchema = PaginatedResultSchema.extend({
+export const ListToolsResultSchema = z.extend(PaginatedResultSchema, {
   tools: z.array(ToolSchema),
 });
 
 /**
  * The server's response to a tool call.
  */
-export const CallToolResultSchema = ResultSchema.extend({
+export const CallToolResultSchema = z.extend(ResultSchema, {
   content: z.array(
     z.union([
       TextContentSchema,
@@ -144,25 +138,26 @@ export const CallToolResultSchema = ResultSchema.extend({
       EmbeddedResourceSchema,
     ])
   ),
-  isError: z.boolean().default(false).optional(),
+  isError: z.optional(z._default(z.boolean(), false)),
 });
 
 /**
  * CallToolResultSchema extended with backwards compatibility to protocol
  * version 2024-10-07.
  */
-export const CompatibilityCallToolResultSchema = CallToolResultSchema.or(
-  ResultSchema.extend({
+export const CompatibilityCallToolResultSchema = z.union([
+  CallToolResultSchema,
+  z.extend(ResultSchema, {
     toolResult: z.unknown(),
-  })
-);
+  }),
+]);
 
 /**
  * Used by the client to invoke a tool provided by the server.
  */
-export const CallToolRequestSchema = RequestSchema.extend({
+export const CallToolRequestSchema = z.extend(RequestSchema, {
   method: z.literal("tools/call"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     name: z.string(),
     arguments: z.optional(z.record(z.string(), z.unknown())),
   }),
@@ -173,6 +168,6 @@ export const CallToolRequestSchema = RequestSchema.extend({
  * list of tools it offers has changed. This may be issued by servers without
  * any previous subscription from the client.
  */
-export const ToolListChangedNotificationSchema = NotificationSchema.extend({
+export const ToolListChangedNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/tools/list_changed"),
 });

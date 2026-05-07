@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { IdSchema } from "../../../jsonrpc2/schemas/id.js";
 import {
   BaseNotificationParamsSchema,
@@ -34,9 +34,9 @@ import { ProgressSchema } from "./progress.schema.js";
  *
  * A client MUST NOT attempt to cancel its `initialize` request.
  */
-export const CancelledNotificationSchema = NotificationSchema.extend({
+export const CancelledNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/cancelled"),
-  params: BaseNotificationParamsSchema.extend({
+  params: z.extend(BaseNotificationParamsSchema, {
     /**
      * The ID of the request to cancel.
      *
@@ -49,7 +49,7 @@ export const CancelledNotificationSchema = NotificationSchema.extend({
      * An optional string describing the reason for the cancellation. This MAY
      * be logged or presented to the user.
      */
-    reason: z.string().optional(),
+    reason: z.optional(z.string()),
   }),
 });
 
@@ -57,7 +57,7 @@ export const CancelledNotificationSchema = NotificationSchema.extend({
  * This notification is sent from the client to the server after initialization
  * has finished.
  */
-export const InitializedNotificationSchema = NotificationSchema.extend({
+export const InitializedNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/initialized"),
 });
 
@@ -65,7 +65,7 @@ export const InitializedNotificationSchema = NotificationSchema.extend({
  * An out-of-band notification used to inform the receiver of a progress update
  * for a long-running request.
  */
-export const ProgressNotificationSchema = NotificationSchema.extend({
+export const ProgressNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/progress"),
   params: z.object({
     /**

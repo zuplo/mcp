@@ -12,52 +12,44 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
 } from "../../../jsonrpc2/schemas/request.js";
 import { ResultSchema } from "../../../jsonrpc2/schemas/response.js";
 
-export const StringSchemaSchema = z
-  .object({
-    type: z.literal("string"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    minLength: z.optional(z.number()),
-    maxLength: z.optional(z.number()),
-    format: z.optional(z.enum(["email", "uri", "date", "date-time"])),
-  })
-  .loose();
+export const StringSchemaSchema = z.looseObject({
+  type: z.literal("string"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  minLength: z.optional(z.number()),
+  maxLength: z.optional(z.number()),
+  format: z.optional(z.enum(["email", "uri", "date", "date-time"])),
+});
 
-export const NumberSchemaSchema = z
-  .object({
-    type: z.enum(["number", "integer"]),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    minimum: z.optional(z.number()),
-    maximum: z.optional(z.number()),
-  })
-  .loose();
+export const NumberSchemaSchema = z.looseObject({
+  type: z.enum(["number", "integer"]),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  minimum: z.optional(z.number()),
+  maximum: z.optional(z.number()),
+});
 
-export const BooleanSchemaSchema = z
-  .object({
-    type: z.literal("boolean"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    default: z.optional(z.boolean()),
-  })
-  .loose();
+export const BooleanSchemaSchema = z.looseObject({
+  type: z.literal("boolean"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  default: z.optional(z.boolean()),
+});
 
-export const EnumSchemaSchema = z
-  .object({
-    type: z.literal("string"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    enum: z.array(z.string()),
-    enumNames: z.optional(z.array(z.string())), // Display names for enum values
-  })
-  .loose();
+export const EnumSchemaSchema = z.looseObject({
+  type: z.literal("string"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  enum: z.array(z.string()),
+  enumNames: z.optional(z.array(z.string())), // Display names for enum values
+});
 
 /**
  * Restricted schema definitions that only allow primitive types
@@ -73,9 +65,9 @@ export const PrimitiveSchemaDefinitionSchema = z.discriminatedUnion("type", [
 /**
  * A request from the server to elicit additional information from the user via the client.
  */
-export const ElicitRequestSchema = RequestSchema.extend({
+export const ElicitRequestSchema = z.extend(RequestSchema, {
   method: z.literal("elicitation/create"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     /**
      * The message to present to the user.
      */
@@ -84,20 +76,18 @@ export const ElicitRequestSchema = RequestSchema.extend({
      * A restricted subset of JSON Schema.
      * Only top-level properties are allowed, without nesting.
      */
-    requestedSchema: z
-      .object({
-        type: z.literal("object"),
-        properties: z.record(z.string(), PrimitiveSchemaDefinitionSchema),
-        required: z.optional(z.array(z.string())),
-      })
-      .loose(),
+    requestedSchema: z.looseObject({
+      type: z.literal("object"),
+      properties: z.record(z.string(), PrimitiveSchemaDefinitionSchema),
+      required: z.optional(z.array(z.string())),
+    }),
   }),
 });
 
 /**
  * The client's response to an elicitation request.
  */
-export const ElicitResultSchema = ResultSchema.extend({
+export const ElicitResultSchema = z.extend(ResultSchema, {
   /**
    * The user action in response to the elicitation.
    * - "accept": User submitted the form/confirmed the action

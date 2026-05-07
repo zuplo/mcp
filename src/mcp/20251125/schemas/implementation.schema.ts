@@ -12,24 +12,25 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { BaseMetadataSchema, IconsSchema } from "./base.schema.js";
 
 /**
  * Describes the MCP implementation.
  */
-export const ImplementationSchema = BaseMetadataSchema.merge(
-  IconsSchema
-).extend({
-  version: z.string(),
+export const ImplementationSchema = z.extend(
+  z.extend(BaseMetadataSchema, IconsSchema.shape),
+  {
+    version: z.string(),
 
-  /**
-   * An optional human-readable description of what this implementation does.
-   */
-  description: z.optional(z.string()),
+    /**
+     * An optional human-readable description of what this implementation does.
+     */
+    description: z.optional(z.string()),
 
-  /**
-   * An optional URL of the website for this implementation.
-   */
-  websiteUrl: z.optional(z.string()),
-});
+    /**
+     * An optional URL of the website for this implementation.
+     */
+    websiteUrl: z.optional(z.string()),
+  }
+);

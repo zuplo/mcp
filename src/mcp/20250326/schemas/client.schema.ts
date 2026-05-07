@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { EmptyResultSchema } from "./../../../jsonrpc2/schemas/response.js";
 import { CompleteRequestSchema } from "./autocomplete.schema.js";
 import { InitializeRequestSchema } from "./initialize.schema.js";

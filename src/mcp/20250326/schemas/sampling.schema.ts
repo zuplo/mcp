@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
@@ -27,56 +27,46 @@ import {
 /**
  * Hints to use for model selection.
  */
-export const ModelHintSchema = z
-  .object({
-    /**
-     * A hint for a model name.
-     */
-    name: z.string().optional(),
-  })
-  .loose();
+export const ModelHintSchema = z.looseObject({
+  /**
+   * A hint for a model name.
+   */
+  name: z.optional(z.string()),
+});
 
 /**
  * The server's preferences for model selection, requested of the client during
  * sampling.
  */
-export const ModelPreferencesSchema = z
-  .object({
-    /**
-     * Optional hints to use for model selection.
-     */
-    hints: z.optional(z.array(ModelHintSchema)),
+export const ModelPreferencesSchema = z.looseObject({
+  /**
+   * Optional hints to use for model selection.
+   */
+  hints: z.optional(z.array(ModelHintSchema)),
 
-    /**
-     * How much to prioritize cost when selecting a model.
-     */
-    costPriority: z.optional(z.number().min(0).max(1)),
+  /**
+   * How much to prioritize cost when selecting a model.
+   */
+  costPriority: z.optional(z.number().check(z.gte(0), z.lte(1))),
 
-    /**
-     * How much to prioritize sampling speed (latency) when selecting a model.
-     */
-    speedPriority: z.optional(z.number().min(0).max(1)),
+  /**
+   * How much to prioritize sampling speed (latency) when selecting a model.
+   */
+  speedPriority: z.optional(z.number().check(z.gte(0), z.lte(1))),
 
-    /**
-     * How much to prioritize intelligence and capabilities when selecting a model.
-     */
-    intelligencePriority: z.optional(z.number().min(0).max(1)),
-  })
-  .loose();
+  /**
+   * How much to prioritize intelligence and capabilities when selecting a model.
+   */
+  intelligencePriority: z.optional(z.number().check(z.gte(0), z.lte(1))),
+});
 
 /**
  * Describes a message issued to or received from an LLM API.
  */
-export const SamplingMessageSchema = z
-  .object({
-    role: z.enum(["user", "assistant"]),
-    content: z.union([
-      TextContentSchema,
-      ImageContentSchema,
-      AudioContentSchema,
-    ]),
-  })
-  .loose();
+export const SamplingMessageSchema = z.looseObject({
+  role: z.enum(["user", "assistant"]),
+  content: z.union([TextContentSchema, ImageContentSchema, AudioContentSchema]),
+});
 
 /**
  * A request from the server to sample an LLM via the client. The client has
@@ -84,9 +74,9 @@ export const SamplingMessageSchema = z
  * the user before beginning sampling, to allow them to inspect the request
  * (human in the loop) and decide whether to approve it.
  */
-export const CreateMessageRequestSchema = RequestSchema.extend({
+export const CreateMessageRequestSchema = z.extend(RequestSchema, {
   method: z.literal("sampling/createMessage"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     messages: z.array(SamplingMessageSchema),
     /**
      * An optional system prompt the server wants to use for sampling. The
@@ -106,14 +96,14 @@ export const CreateMessageRequestSchema = RequestSchema.extend({
      * The maximum number of tokens to sample, as requested by the server. The
      * client MAY choose to sample fewer tokens than requested.
      */
-    maxTokens: z.number().int(),
+    maxTokens: z.int(),
     stopSequences: z.optional(z.array(z.string())),
 
     /**
      * Optional metadata to pass through to the LLM provider. The format of this
      * metadata is provider-specific.
      */
-    metadata: z.optional(z.object({}).loose()),
+    metadata: z.optional(z.looseObject({})),
 
     /**
      * The server's preferences for which model to select.
@@ -128,7 +118,7 @@ export const CreateMessageRequestSchema = RequestSchema.extend({
  * allow them to inspect the response (human in the loop) and decide whether to
  * allow the server to see it.
  */
-export const CreateMessageResultSchema = ResultSchema.extend({
+export const CreateMessageResultSchema = z.extend(ResultSchema, {
   /**
    * The name of the model that generated the message.
    */
@@ -138,7 +128,7 @@ export const CreateMessageResultSchema = ResultSchema.extend({
    * The reason why sampling stopped.
    */
   stopReason: z.optional(
-    z.enum(["endTurn", "stopSequence", "maxTokens"]).or(z.string())
+    z.union([z.enum(["endTurn", "stopSequence", "maxTokens"]), z.string()])
   ),
   role: z.enum(["user", "assistant"]),
   content: z.discriminatedUnion("type", [

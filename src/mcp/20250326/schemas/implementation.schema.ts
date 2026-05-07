@@ -12,14 +12,12 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 
 /**
  * Describes the name and version of an MCP implementation.
  */
-export const ImplementationSchema = z
-  .object({
-    name: z.string(),
-    version: z.string(),
-  })
-  .loose();
+export const ImplementationSchema = z.looseObject({
+  name: z.string(),
+  version: z.string(),
+});

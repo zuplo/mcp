@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseNotificationParamsSchema,
   NotificationSchema,
@@ -32,21 +32,19 @@ import {
 /**
  * The contents of a specific resource or sub-resource.
  */
-export const ResourceContentsSchema = z
-  .object({
-    /**
-     * The URI of this resource.
-     */
-    uri: z.string(),
+export const ResourceContentsSchema = z.looseObject({
+  /**
+   * The URI of this resource.
+   */
+  uri: z.string(),
 
-    /**
-     * The MIME type of this resource, if known.
-     */
-    mimeType: z.optional(z.string()),
-  })
-  .loose();
+  /**
+   * The MIME type of this resource, if known.
+   */
+  mimeType: z.optional(z.string()),
+});
 
-export const TextResourceContentsSchema = ResourceContentsSchema.extend({
+export const TextResourceContentsSchema = z.extend(ResourceContentsSchema, {
   /**
    * The text of the item. This must only be set if the item can actually be
    * represented as text (not binary data).
@@ -54,7 +52,7 @@ export const TextResourceContentsSchema = ResourceContentsSchema.extend({
   text: z.string(),
 });
 
-export const BlobResourceContentsSchema = ResourceContentsSchema.extend({
+export const BlobResourceContentsSchema = z.extend(ResourceContentsSchema, {
   /**
    * A base64-encoded string representing the binary data of the item.
    */
@@ -64,87 +62,84 @@ export const BlobResourceContentsSchema = ResourceContentsSchema.extend({
 /**
  * A known resource that the server is capable of reading.
  */
-export const ResourceSchema = z
-  .object({
-    /**
-     * The URI of this resource.
-     */
-    uri: z.string(),
+export const ResourceSchema = z.looseObject({
+  /**
+   * The URI of this resource.
+   */
+  uri: z.string(),
 
-    /**
-     * A human-readable name for this resource.
-     *
-     * This can be used by clients to populate UI elements.
-     */
-    name: z.string(),
+  /**
+   * A human-readable name for this resource.
+   *
+   * This can be used by clients to populate UI elements.
+   */
+  name: z.string(),
 
-    /**
-     * A description of what this resource represents.
-     *
-     * This can be used by clients to improve the LLM's understanding of
-     * available resources. It can be thought of like a "hint" to the model.
-     */
-    description: z.optional(z.string()),
+  /**
+   * A description of what this resource represents.
+   *
+   * This can be used by clients to improve the LLM's understanding of
+   * available resources. It can be thought of like a "hint" to the model.
+   */
+  description: z.optional(z.string()),
 
-    /**
-     * The MIME type of this resource, if known.
-     */
-    mimeType: z.optional(z.string()),
-  })
-  .loose();
+  /**
+   * The MIME type of this resource, if known.
+   */
+  mimeType: z.optional(z.string()),
+});
 
 /**
  * A template description for resources available on the server.
  */
-export const ResourceTemplateSchema = z
-  .object({
-    /**
-     * A URI template (according to RFC 6570) that can be used to construct
-     * resource URIs.
-     */
-    uriTemplate: z.string(),
+export const ResourceTemplateSchema = z.looseObject({
+  /**
+   * A URI template (according to RFC 6570) that can be used to construct
+   * resource URIs.
+   */
+  uriTemplate: z.string(),
 
-    /**
-     * A human-readable name for the type of resource this template refers to.
-     *
-     * This can be used by clients to populate UI elements.
-     */
-    name: z.string(),
+  /**
+   * A human-readable name for the type of resource this template refers to.
+   *
+   * This can be used by clients to populate UI elements.
+   */
+  name: z.string(),
 
-    /**
-     * A description of what this template is for.
-     *
-     * This can be used by clients to improve the LLM's understanding of
-     * available resources. It can be thought of like a "hint" to the model.
-     */
-    description: z.optional(z.string()),
+  /**
+   * A description of what this template is for.
+   *
+   * This can be used by clients to improve the LLM's understanding of
+   * available resources. It can be thought of like a "hint" to the model.
+   */
+  description: z.optional(z.string()),
 
-    /**
-     * The MIME type for all resources that match this template. This should
-     * only be included if all resources matching this template have the same type.
-     */
-    mimeType: z.optional(z.string()),
-  })
-  .loose();
+  /**
+   * The MIME type for all resources that match this template. This should
+   * only be included if all resources matching this template have the same type.
+   */
+  mimeType: z.optional(z.string()),
+});
 
 /**
  * Sent from the client to request a list of resources the server has.
  */
-export const ListResourcesRequestSchema = PaginatedRequestSchema.extend({
+export const ListResourcesRequestSchema = z.extend(PaginatedRequestSchema, {
   method: z.literal("resources/list"),
 });
 
 /**
  * The server's response to a resources/list request from the client.
  */
-export const ListResourcesResultSchema = PaginatedResultSchema.extend({
+export const ListResourcesResultSchema = z.extend(PaginatedResultSchema, {
   resources: z.array(ResourceSchema),
 });
 
 /**
  * Sent from the client to request a list of resource templates the server has.
  */
-export const ListResourceTemplatesRequestSchema = PaginatedRequestSchema.extend(
+export const ListResourceTemplatesRequestSchema = z.extend(
+  PaginatedRequestSchema,
   {
     method: z.literal("resources/templates/list"),
   }
@@ -153,16 +148,19 @@ export const ListResourceTemplatesRequestSchema = PaginatedRequestSchema.extend(
 /**
  * The server's response to a resources/templates/list request from the client.
  */
-export const ListResourceTemplatesResultSchema = PaginatedResultSchema.extend({
-  resourceTemplates: z.array(ResourceTemplateSchema),
-});
+export const ListResourceTemplatesResultSchema = z.extend(
+  PaginatedResultSchema,
+  {
+    resourceTemplates: z.array(ResourceTemplateSchema),
+  }
+);
 
 /**
  * Sent from the client to the server, to read a specific resource URI.
  */
-export const ReadResourceRequestSchema = RequestSchema.extend({
+export const ReadResourceRequestSchema = z.extend(RequestSchema, {
   method: z.literal("resources/read"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     /**
      * The URI of the resource to read. The URI can use any protocol; it is up
      * to the server how to interpret it.
@@ -174,7 +172,7 @@ export const ReadResourceRequestSchema = RequestSchema.extend({
 /**
  * The server's response to a resources/read request from the client.
  */
-export const ReadResourceResultSchema = ResultSchema.extend({
+export const ReadResourceResultSchema = z.extend(ResultSchema, {
   contents: z.array(
     z.union([TextResourceContentsSchema, BlobResourceContentsSchema])
   ),
@@ -185,17 +183,20 @@ export const ReadResourceResultSchema = ResultSchema.extend({
  * list of resources it can read from has changed. This may be issued by servers
  * without any previous subscription from the client.
  */
-export const ResourceListChangedNotificationSchema = NotificationSchema.extend({
-  method: z.literal("notifications/resources/list_changed"),
-});
+export const ResourceListChangedNotificationSchema = z.extend(
+  NotificationSchema,
+  {
+    method: z.literal("notifications/resources/list_changed"),
+  }
+);
 
 /**
  * Sent from the client to request resources/updated notifications from the
  * server whenever a particular resource changes.
  */
-export const SubscribeRequestSchema = RequestSchema.extend({
+export const SubscribeRequestSchema = z.extend(RequestSchema, {
   method: z.literal("resources/subscribe"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     /**
      * The URI of the resource to subscribe to. The URI can use any protocol; it
      * is up to the server how to interpret it.
@@ -209,9 +210,9 @@ export const SubscribeRequestSchema = RequestSchema.extend({
  * notifications from the server. This should follow a previous
  * resources/subscribe request.
  */
-export const UnsubscribeRequestSchema = RequestSchema.extend({
+export const UnsubscribeRequestSchema = z.extend(RequestSchema, {
   method: z.literal("resources/unsubscribe"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     /**
      * The URI of the resource to unsubscribe from.
      */
@@ -224,9 +225,9 @@ export const UnsubscribeRequestSchema = RequestSchema.extend({
  * has changed and may need to be read again. This should only be sent if the
  * client previously sent a resources/subscribe request.
  */
-export const ResourceUpdatedNotificationSchema = NotificationSchema.extend({
+export const ResourceUpdatedNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/resources/updated"),
-  params: BaseNotificationParamsSchema.extend({
+  params: z.extend(BaseNotificationParamsSchema, {
     /**
      * The URI of the resource that has been updated. This might be a
      * sub-resource of the one that the client actually subscribed to.

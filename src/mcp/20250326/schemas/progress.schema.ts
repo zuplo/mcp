@@ -12,19 +12,17 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 
-export const ProgressSchema = z
-  .object({
-    /**
-     * The progress thus far. This should increase every time progress is made,
-     * even if the total is unknown.
-     */
-    progress: z.number(),
+export const ProgressSchema = z.looseObject({
+  /**
+   * The progress thus far. This should increase every time progress is made,
+   * even if the total is unknown.
+   */
+  progress: z.number(),
 
-    /**
-     * Total number of items to process (or total progress required), if known.
-     */
-    total: z.optional(z.number()),
-  })
-  .loose();
+  /**
+   * Total number of items to process (or total progress required), if known.
+   */
+  total: z.optional(z.number()),
+});

@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { ErrorCode } from "../jsonrpc2/consts.js";
 import {
   type JSONRPCError,

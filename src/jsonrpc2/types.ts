@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import type { z } from "zod/v4";
+import type * as z from "zod/mini";
 import { type ErrorCode, JSONRPC_VERSION } from "./consts.js";
 import type { CursorSchema } from "./schemas/cursor.js";
 import type { JSONRPCErrorSchema } from "./schemas/error.js";

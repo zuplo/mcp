@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
@@ -37,31 +37,29 @@ import { TaskMetadataSchema } from "./tasks.schema.js";
 /**
  * A request from the assistant to call a tool.
  */
-export const ToolUseContentSchema = z
-  .object({
-    type: z.literal("tool_use"),
+export const ToolUseContentSchema = z.looseObject({
+  type: z.literal("tool_use"),
 
-    /**
-     * A unique identifier for this tool use.
-     */
-    id: z.string(),
+  /**
+   * A unique identifier for this tool use.
+   */
+  id: z.string(),
 
-    /**
-     * The name of the tool to call.
-     */
-    name: z.string(),
+  /**
+   * The name of the tool to call.
+   */
+  name: z.string(),
 
-    /**
-     * The arguments to pass to the tool, conforming to the tool's input schema.
-     */
-    input: z.record(z.string(), z.unknown()),
+  /**
+   * The arguments to pass to the tool, conforming to the tool's input schema.
+   */
+  input: z.record(z.string(), z.unknown()),
 
-    /**
-     * Optional metadata about the tool use.
-     */
-    _meta: z.optional(z.object({}).loose()),
-  })
-  .loose();
+  /**
+   * Optional metadata about the tool use.
+   */
+  _meta: z.optional(z.looseObject({})),
+});
 
 /**
  * The result of a tool use, provided by the user back to the assistant.
@@ -70,44 +68,42 @@ export const ToolResultContentSchema = z.lazy(() => {
   const { EmbeddedResourceSchema } = require("./content.schema.js");
   const { ResourceLinkSchema } = require("./resource.schema.js");
 
-  return z
-    .object({
-      type: z.literal("tool_result"),
+  return z.looseObject({
+    type: z.literal("tool_result"),
 
-      /**
-       * The ID of the tool use this result corresponds to.
-       */
-      toolUseId: z.string(),
+    /**
+     * The ID of the tool use this result corresponds to.
+     */
+    toolUseId: z.string(),
 
-      /**
-       * The unstructured result content of the tool use.
-       */
-      content: z.array(
-        z.discriminatedUnion("type", [
-          TextContentSchema,
-          ImageContentSchema,
-          AudioContentSchema,
-          ResourceLinkSchema,
-          EmbeddedResourceSchema,
-        ])
-      ),
+    /**
+     * The unstructured result content of the tool use.
+     */
+    content: z.array(
+      z.discriminatedUnion("type", [
+        TextContentSchema,
+        ImageContentSchema,
+        AudioContentSchema,
+        ResourceLinkSchema,
+        EmbeddedResourceSchema,
+      ])
+    ),
 
-      /**
-       * An optional structured result object.
-       */
-      structuredContent: z.optional(z.record(z.string(), z.unknown())),
+    /**
+     * An optional structured result object.
+     */
+    structuredContent: z.optional(z.record(z.string(), z.unknown())),
 
-      /**
-       * Whether the tool use resulted in an error.
-       */
-      isError: z.optional(z.boolean()),
+    /**
+     * Whether the tool use resulted in an error.
+     */
+    isError: z.optional(z.boolean()),
 
-      /**
-       * Optional metadata about the tool result.
-       */
-      _meta: z.optional(z.object({}).loose()),
-    })
-    .loose();
+    /**
+     * Optional metadata about the tool result.
+     */
+    _meta: z.optional(z.looseObject({})),
+  });
 });
 
 /**
@@ -124,34 +120,30 @@ export const SamplingMessageContentBlockSchema = z.discriminatedUnion("type", [
 /**
  * Describes a message issued to or received from an LLM API.
  */
-export const SamplingMessageSchema = z
-  .object({
-    role: z.enum(["user", "assistant"]),
-    content: z.union([
-      SamplingMessageContentBlockSchema,
-      z.array(SamplingMessageContentBlockSchema),
-    ]),
-    /**
-     * See [specification/2025-11-25/basic/index#general-fields] for notes on _meta usage.
-     */
-    _meta: z.optional(z.object({}).loose()),
-  })
-  .loose();
+export const SamplingMessageSchema = z.looseObject({
+  role: z.enum(["user", "assistant"]),
+  content: z.union([
+    SamplingMessageContentBlockSchema,
+    z.array(SamplingMessageContentBlockSchema),
+  ]),
+  /**
+   * See [specification/2025-11-25/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta: z.optional(z.looseObject({})),
+});
 
 /**
  * Controls tool selection behavior for sampling requests.
  */
-export const ToolChoiceSchema = z
-  .object({
-    /**
-     * Controls the tool use ability of the model:
-     * - "auto": Model decides whether to use tools (default)
-     * - "required": Model MUST use at least one tool before completing
-     * - "none": Model MUST NOT use any tools
-     */
-    mode: z.optional(z.enum(["auto", "required", "none"])),
-  })
-  .loose();
+export const ToolChoiceSchema = z.looseObject({
+  /**
+   * Controls the tool use ability of the model:
+   * - "auto": Model decides whether to use tools (default)
+   * - "required": Model MUST use at least one tool before completing
+   * - "none": Model MUST NOT use any tools
+   */
+  mode: z.optional(z.enum(["auto", "required", "none"])),
+});
 
 /**
  * A request from the server to sample an LLM via the client. The client has full
@@ -162,9 +154,9 @@ export const ToolChoiceSchema = z
 export const CreateMessageRequestSchema = z.lazy(() => {
   const { ToolSchema } = require("./tools.schema.js");
 
-  return RequestSchema.extend({
+  return z.extend(RequestSchema, {
     method: z.literal("sampling/createMessage"),
-    params: BaseRequestParamsSchema.extend({
+    params: z.extend(BaseRequestParamsSchema, {
       messages: z.array(SamplingMessageSchema),
       /**
        * The server's preferences for which model to select. The client MAY ignore
@@ -194,7 +186,7 @@ export const CreateMessageRequestSchema = z.lazy(() => {
        * Optional metadata to pass through to the LLM provider. The format of this
        * metadata is provider-specific.
        */
-      metadata: z.optional(z.object({}).loose()),
+      metadata: z.optional(z.looseObject({})),
       /**
        * Tools that the model may use during generation.
        */
@@ -217,7 +209,7 @@ export const CreateMessageRequestSchema = z.lazy(() => {
  * allow them to inspect the response (human in the loop) and decide whether to
  * allow the server to see it.
  */
-export const CreateMessageResultSchema = ResultSchema.extend({
+export const CreateMessageResultSchema = z.extend(ResultSchema, {
   /**
    * The name of the model that generated the message.
    */
@@ -232,7 +224,10 @@ export const CreateMessageResultSchema = ResultSchema.extend({
    * - "toolUse": The model wants to use one or more tools
    */
   stopReason: z.optional(
-    z.enum(["endTurn", "stopSequence", "maxTokens", "toolUse"]).or(z.string())
+    z.union([
+      z.enum(["endTurn", "stopSequence", "maxTokens", "toolUse"]),
+      z.string(),
+    ])
   ),
   role: z.enum(["user", "assistant"]),
   content: z.union([

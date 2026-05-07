@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseNotificationParamsSchema,
   NotificationSchema,
@@ -39,9 +39,9 @@ export const LoggingLevelSchema = z.enum([
 /**
  * A request from the client to the server, to enable or adjust logging.
  */
-export const SetLevelRequestSchema = RequestSchema.extend({
+export const SetLevelRequestSchema = z.extend(RequestSchema, {
   method: z.literal("logging/setLevel"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     /**
      * The level of logging that the client wants to receive from the server.
      * The server should send all logs at this level and higher (i.e., more
@@ -56,9 +56,9 @@ export const SetLevelRequestSchema = RequestSchema.extend({
  * logging/setLevel request has been sent from the client, the server MAY decide
  * which messages to send automatically.
  */
-export const LoggingMessageNotificationSchema = NotificationSchema.extend({
+export const LoggingMessageNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/message"),
-  params: BaseNotificationParamsSchema.extend({
+  params: z.extend(BaseNotificationParamsSchema, {
     /**
      * The severity of this log message.
      */

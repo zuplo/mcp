@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { NotificationSchema } from "../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -36,144 +36,139 @@ import { TaskMetadataSchema } from "./tasks.schema.js";
  * Clients should never make tool use decisions based on ToolAnnotations
  * received from untrusted servers.
  */
-export const ToolAnnotationsSchema = z
-  .object({
-    /**
-     * A human-readable title for the tool.
-     */
-    title: z.optional(z.string()),
+export const ToolAnnotationsSchema = z.looseObject({
+  /**
+   * A human-readable title for the tool.
+   */
+  title: z.optional(z.string()),
 
-    /**
-     * If true, the tool does not modify its environment.
-     *
-     * Default: false
-     */
-    readOnlyHint: z.optional(z.boolean()),
+  /**
+   * If true, the tool does not modify its environment.
+   *
+   * Default: false
+   */
+  readOnlyHint: z.optional(z.boolean()),
 
-    /**
-     * If true, the tool may perform destructive updates to its environment.
-     * If false, the tool performs only additive updates.
-     *
-     * (This property is meaningful only when `readOnlyHint == false`)
-     *
-     * Default: true
-     */
-    destructiveHint: z.optional(z.boolean()),
+  /**
+   * If true, the tool may perform destructive updates to its environment.
+   * If false, the tool performs only additive updates.
+   *
+   * (This property is meaningful only when `readOnlyHint == false`)
+   *
+   * Default: true
+   */
+  destructiveHint: z.optional(z.boolean()),
 
-    /**
-     * If true, calling the tool repeatedly with the same arguments
-     * will have no additional effect on its environment.
-     *
-     * (This property is meaningful only when `readOnlyHint == false`)
-     *
-     * Default: false
-     */
-    idempotentHint: z.optional(z.boolean()),
+  /**
+   * If true, calling the tool repeatedly with the same arguments
+   * will have no additional effect on its environment.
+   *
+   * (This property is meaningful only when `readOnlyHint == false`)
+   *
+   * Default: false
+   */
+  idempotentHint: z.optional(z.boolean()),
 
-    /**
-     * If true, this tool may interact with an "open world" of external
-     * entities. If false, the tool's domain of interaction is closed.
-     * For example, the world of a web search tool is open, whereas that
-     * of a memory tool is not.
-     *
-     * Default: true
-     */
-    openWorldHint: z.optional(z.boolean()),
-  })
-  .loose();
+  /**
+   * If true, this tool may interact with an "open world" of external
+   * entities. If false, the tool's domain of interaction is closed.
+   * For example, the world of a web search tool is open, whereas that
+   * of a memory tool is not.
+   *
+   * Default: true
+   */
+  openWorldHint: z.optional(z.boolean()),
+});
 
 /**
  * Execution-related properties for a tool.
  */
-export const ToolExecutionSchema = z
-  .object({
-    /**
-     * Indicates whether this tool supports task-augmented execution.
-     * - "forbidden": Tool does not support task-augmented execution (default when absent)
-     * - "optional": Tool may support task-augmented execution
-     * - "required": Tool requires task-augmented execution
-     */
-    taskSupport: z.optional(z.enum(["forbidden", "optional", "required"])),
-  })
-  .loose();
+export const ToolExecutionSchema = z.looseObject({
+  /**
+   * Indicates whether this tool supports task-augmented execution.
+   * - "forbidden": Tool does not support task-augmented execution (default when absent)
+   * - "optional": Tool may support task-augmented execution
+   * - "required": Tool requires task-augmented execution
+   */
+  taskSupport: z.optional(z.enum(["forbidden", "optional", "required"])),
+});
 
 /**
  * Definition for a tool the client can call.
  */
-export const ToolSchema = BaseMetadataSchema.merge(IconsSchema).extend({
-  /**
-   * A human-readable description of the tool.
-   *
-   * This can be used by clients to improve the LLM's understanding of available
-   * tools. It can be thought of like a "hint" to the model.
-   */
-  description: z.optional(z.string()),
+export const ToolSchema = z.extend(
+  z.extend(BaseMetadataSchema, IconsSchema.shape),
+  {
+    /**
+     * A human-readable description of the tool.
+     *
+     * This can be used by clients to improve the LLM's understanding of available
+     * tools. It can be thought of like a "hint" to the model.
+     */
+    description: z.optional(z.string()),
 
-  /**
-   * A JSON Schema object defining the expected parameters for the tool.
-   */
-  inputSchema: z
-    .object({
+    /**
+     * A JSON Schema object defining the expected parameters for the tool.
+     */
+    inputSchema: z.looseObject({
       $schema: z.optional(z.string()),
       type: z.literal("object"),
-      properties: z.optional(z.record(z.string(), z.object({}).loose())),
+      properties: z.optional(z.record(z.string(), z.looseObject({}))),
       required: z.optional(z.array(z.string())),
-    })
-    .loose(),
+    }),
 
-  /**
-   * Execution-related properties for this tool.
-   */
-  execution: z.optional(ToolExecutionSchema),
+    /**
+     * Execution-related properties for this tool.
+     */
+    execution: z.optional(ToolExecutionSchema),
 
-  /**
-   * An optional JSON Schema object defining the structure of the tool's output returned in
-   * the structuredContent field of a CallToolResult.
-   */
-  outputSchema: z.optional(
-    z
-      .object({
+    /**
+     * An optional JSON Schema object defining the structure of the tool's output returned in
+     * the structuredContent field of a CallToolResult.
+     */
+    outputSchema: z.optional(
+      z.looseObject({
         $schema: z.optional(z.string()),
         type: z.literal("object"),
-        properties: z.optional(z.record(z.string(), z.object({}).loose())),
+        properties: z.optional(z.record(z.string(), z.looseObject({}))),
         required: z.optional(z.array(z.string())),
       })
-      .loose()
-  ),
+    ),
 
-  /**
-   * Optional additional tool information.
-   *
-   * Display name precedence order is: title, annotations.title, then name.
-   */
-  annotations: z.optional(ToolAnnotationsSchema),
+    /**
+     * Optional additional tool information.
+     *
+     * Display name precedence order is: title, annotations.title, then name.
+     */
+    annotations: z.optional(ToolAnnotationsSchema),
 
-  /**
-   * See [specification/2025-11-25/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta: z.optional(z.object({}).loose()),
-});
+    /**
+     * See [specification/2025-11-25/basic/index#general-fields] for notes on _meta usage.
+     */
+    _meta: z.optional(z.looseObject({})),
+  }
+);
 
 /**
  * Sent from the client to request a list of tools the server has.
  */
-export const ListToolsRequestSchema = PaginatedRequestSchema.extend({
+export const ListToolsRequestSchema = z.extend(PaginatedRequestSchema, {
   method: z.literal("tools/list"),
 });
 
 /**
  * The server's response to a tools/list request from the client.
  */
-export const ListToolsResultSchema = PaginatedResultSchema.extend({
+export const ListToolsResultSchema = z.extend(PaginatedResultSchema, {
   tools: z.array(ToolSchema),
 });
 
 /**
  * Used by the client to invoke a tool provided by the server.
  */
-export const CallToolRequestSchema = RequestSchema.extend({
+export const CallToolRequestSchema = z.extend(RequestSchema, {
   method: z.literal("tools/call"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     name: z.string(),
     arguments: z.optional(z.record(z.string(), z.unknown())),
     task: z.optional(TaskMetadataSchema),
@@ -192,7 +187,7 @@ export const CallToolResultSchema = z.lazy(() => {
   } = require("./content.schema.js");
   const { ResourceLinkSchema } = require("./resource.schema.js");
 
-  return ResultSchema.extend({
+  return z.extend(ResultSchema, {
     /**
      * A list of content objects that represent the unstructured result of the tool call.
      */
@@ -234,6 +229,6 @@ export const CallToolResultSchema = z.lazy(() => {
  * the list of tools it offers has changed. This may be issued by servers
  * without any previous subscription from the client.
  */
-export const ToolListChangedNotificationSchema = NotificationSchema.extend({
+export const ToolListChangedNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/tools/list_changed"),
 });

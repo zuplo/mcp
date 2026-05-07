@@ -12,14 +12,14 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 
 /**
  * A uniquely identifying ID established by the client for a request / response
  * object in JSON-RPC.
  *
  */
-export const IdSchema = z.union([z.string(), z.number().int()]);
+export const IdSchema = z.union([z.string(), z.int()]);
 
 /**
  * In cases of parsing errors, the ID must be set to null.

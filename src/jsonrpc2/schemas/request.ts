@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { JSONRPC_VERSION } from "../consts.js";
 import { IdSchema } from "./id.js";
 
@@ -20,26 +20,22 @@ import { IdSchema } from "./id.js";
  * A progress token, used to associate progress notifications with the original
  * request.
  */
-export const ProgressTokenSchema = z.union([z.string(), z.number().int()]);
+export const ProgressTokenSchema = z.union([z.string(), z.int()]);
 
-export const RequestMetaSchema = z
-  .object({
-    /**
-     * If specified, the caller is requesting out-of-band progress notifications
-     * for this request (as represented by notifications/progress). The value of
-     * this parameter is an opaque token that will be attached to any subsequent
-     * notifications. The receiver is not obligated to provide these
-     * notifications.
-     */
-    progressToken: z.optional(ProgressTokenSchema),
-  })
-  .loose();
+export const RequestMetaSchema = z.looseObject({
+  /**
+   * If specified, the caller is requesting out-of-band progress notifications
+   * for this request (as represented by notifications/progress). The value of
+   * this parameter is an opaque token that will be attached to any subsequent
+   * notifications. The receiver is not obligated to provide these
+   * notifications.
+   */
+  progressToken: z.optional(ProgressTokenSchema),
+});
 
-export const BaseRequestParamsSchema = z
-  .object({
-    _meta: z.optional(RequestMetaSchema),
-  })
-  .loose();
+export const BaseRequestParamsSchema = z.looseObject({
+  _meta: z.optional(RequestMetaSchema),
+});
 
 export const RequestSchema = z.object({
   method: z.string(),
@@ -49,10 +45,8 @@ export const RequestSchema = z.object({
 /**
  * A request that expects a response.
  */
-export const JSONRPCRequestSchema = z
-  .object({
-    jsonrpc: z.literal(JSONRPC_VERSION),
-    id: IdSchema,
-    ...RequestSchema.shape,
-  })
-  .strict();
+export const JSONRPCRequestSchema = z.strictObject({
+  jsonrpc: z.literal(JSONRPC_VERSION),
+  id: IdSchema,
+  ...RequestSchema.shape,
+});

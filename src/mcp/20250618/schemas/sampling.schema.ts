@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
@@ -30,23 +30,21 @@ import {
  * Keys not declared here are currently left unspecified by the spec and are up
  * to the client to interpret.
  */
-export const ModelHintSchema = z
-  .object({
-    /**
-     * A hint for a model name.
-     *
-     * The client SHOULD treat this as a substring of a model name; for example:
-     *  - `claude-3-5-sonnet` should match `claude-3-5-sonnet-20241022`
-     *  - `sonnet` should match `claude-3-5-sonnet-20241022`, `claude-3-sonnet-20240229`, etc.
-     *  - `claude` should match any Claude model
-     *
-     * The client MAY also map the string to a different provider's model name
-     * or a different model family, as long as it fills a similar niche; for example:
-     *  - `gemini-1.5-flash` could match `claude-3-haiku-20240307`
-     */
-    name: z.optional(z.string()),
-  })
-  .loose();
+export const ModelHintSchema = z.looseObject({
+  /**
+   * A hint for a model name.
+   *
+   * The client SHOULD treat this as a substring of a model name; for example:
+   *  - `claude-3-5-sonnet` should match `claude-3-5-sonnet-20241022`
+   *  - `sonnet` should match `claude-3-5-sonnet-20241022`, `claude-3-sonnet-20240229`, etc.
+   *  - `claude` should match any Claude model
+   *
+   * The client MAY also map the string to a different provider's model name
+   * or a different model family, as long as it fills a similar niche; for example:
+   *  - `gemini-1.5-flash` could match `claude-3-haiku-20240307`
+   */
+  name: z.optional(z.string()),
+});
 
 /**
  * The server's preferences for model selection, requested of the client during sampling.
@@ -61,55 +59,51 @@ export const ModelHintSchema = z
  * up to the client to decide how to interpret these preferences and how to
  * balance them against other considerations.
  */
-export const ModelPreferencesSchema = z
-  .object({
-    /**
-     * Optional hints to use for model selection.
-     *
-     * If multiple hints are specified, the client MUST evaluate them in order
-     * (such that the first match is taken).
-     *
-     * The client SHOULD prioritize these hints over the numeric priorities, but
-     * MAY still use the priorities to select from ambiguous matches.
-     */
-    hints: z.optional(z.array(ModelHintSchema)),
+export const ModelPreferencesSchema = z.looseObject({
+  /**
+   * Optional hints to use for model selection.
+   *
+   * If multiple hints are specified, the client MUST evaluate them in order
+   * (such that the first match is taken).
+   *
+   * The client SHOULD prioritize these hints over the numeric priorities, but
+   * MAY still use the priorities to select from ambiguous matches.
+   */
+  hints: z.optional(z.array(ModelHintSchema)),
 
-    /**
-     * How much to prioritize cost when selecting a model. A value of 0 means cost
-     * is not important, while a value of 1 means cost is the most important
-     * factor.
-     */
-    costPriority: z.optional(z.number().min(0).max(1)),
+  /**
+   * How much to prioritize cost when selecting a model. A value of 0 means cost
+   * is not important, while a value of 1 means cost is the most important
+   * factor.
+   */
+  costPriority: z.optional(z.number().check(z.gte(0), z.lte(1))),
 
-    /**
-     * How much to prioritize sampling speed (latency) when selecting a model. A
-     * value of 0 means speed is not important, while a value of 1 means speed is
-     * the most important factor.
-     */
-    speedPriority: z.optional(z.number().min(0).max(1)),
+  /**
+   * How much to prioritize sampling speed (latency) when selecting a model. A
+   * value of 0 means speed is not important, while a value of 1 means speed is
+   * the most important factor.
+   */
+  speedPriority: z.optional(z.number().check(z.gte(0), z.lte(1))),
 
-    /**
-     * How much to prioritize intelligence and capabilities when selecting a
-     * model. A value of 0 means intelligence is not important, while a value of 1
-     * means intelligence is the most important factor.
-     */
-    intelligencePriority: z.optional(z.number().min(0).max(1)),
-  })
-  .loose();
+  /**
+   * How much to prioritize intelligence and capabilities when selecting a
+   * model. A value of 0 means intelligence is not important, while a value of 1
+   * means intelligence is the most important factor.
+   */
+  intelligencePriority: z.optional(z.number().check(z.gte(0), z.lte(1))),
+});
 
 /**
  * Describes a message issued to or received from an LLM API.
  */
-export const SamplingMessageSchema = z
-  .object({
-    role: z.enum(["user", "assistant"]),
-    content: z.discriminatedUnion("type", [
-      TextContentSchema,
-      ImageContentSchema,
-      AudioContentSchema,
-    ]),
-  })
-  .loose();
+export const SamplingMessageSchema = z.looseObject({
+  role: z.enum(["user", "assistant"]),
+  content: z.discriminatedUnion("type", [
+    TextContentSchema,
+    ImageContentSchema,
+    AudioContentSchema,
+  ]),
+});
 
 /**
  * A request from the server to sample an LLM via the client. The client has full
@@ -117,9 +111,9 @@ export const SamplingMessageSchema = z
  * before beginning sampling, to allow them to inspect the request (human in the
  * loop) and decide whether to approve it.
  */
-export const CreateMessageRequestSchema = RequestSchema.extend({
+export const CreateMessageRequestSchema = z.extend(RequestSchema, {
   method: z.literal("sampling/createMessage"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     messages: z.array(SamplingMessageSchema),
     /**
      * The server's preferences for which model to select. The client MAY ignore
@@ -147,7 +141,7 @@ export const CreateMessageRequestSchema = RequestSchema.extend({
      * Optional metadata to pass through to the LLM provider. The format of this
      * metadata is provider-specific.
      */
-    metadata: z.optional(z.object({}).loose()),
+    metadata: z.optional(z.looseObject({})),
   }),
 });
 
@@ -157,7 +151,7 @@ export const CreateMessageRequestSchema = RequestSchema.extend({
  * allow them to inspect the response (human in the loop) and decide whether to
  * allow the server to see it.
  */
-export const CreateMessageResultSchema = ResultSchema.extend({
+export const CreateMessageResultSchema = z.extend(ResultSchema, {
   /**
    * The name of the model that generated the message.
    */
@@ -166,7 +160,7 @@ export const CreateMessageResultSchema = ResultSchema.extend({
    * The reason why sampling stopped, if known.
    */
   stopReason: z.optional(
-    z.enum(["endTurn", "stopSequence", "maxTokens"]).or(z.string())
+    z.union([z.enum(["endTurn", "stopSequence", "maxTokens"]), z.string()])
   ),
   role: z.enum(["user", "assistant"]),
   content: z.discriminatedUnion("type", [

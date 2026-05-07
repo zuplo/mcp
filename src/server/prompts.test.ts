@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { type JSONRPCRequest, newJSONRPCRequest } from "../jsonrpc2/types.js";
 import type {
   GetPromptResult,

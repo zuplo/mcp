@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { NotificationSchema } from "../../../jsonrpc2/schemas/notifications.js";
 import { RequestSchema } from "../../../jsonrpc2/schemas/request.js";
 import { ResultSchema } from "../../../jsonrpc2/schemas/response.js";
@@ -20,27 +20,25 @@ import { ResultSchema } from "../../../jsonrpc2/schemas/response.js";
 /**
  * Represents a root directory or file that the server can operate on.
  */
-export const RootSchema = z
-  .object({
-    /**
-     * The URI identifying the root. This *must* start with file:// for now.
-     * This restriction may be relaxed in future versions of the protocol to allow
-     * other URI schemes.
-     */
-    uri: z.url(),
-    /**
-     * An optional name for the root. This can be used to provide a human-readable
-     * identifier for the root, which may be useful for display purposes or for
-     * referencing the root in other parts of the application.
-     */
-    name: z.optional(z.string()),
+export const RootSchema = z.looseObject({
+  /**
+   * The URI identifying the root. This *must* start with file:// for now.
+   * This restriction may be relaxed in future versions of the protocol to allow
+   * other URI schemes.
+   */
+  uri: z.url(),
+  /**
+   * An optional name for the root. This can be used to provide a human-readable
+   * identifier for the root, which may be useful for display purposes or for
+   * referencing the root in other parts of the application.
+   */
+  name: z.optional(z.string()),
 
-    /**
-     * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
-     */
-    _meta: z.optional(z.object({}).loose()),
-  })
-  .loose();
+  /**
+   * See [specification/2025-06-18/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta: z.optional(z.looseObject({})),
+});
 
 /**
  * Sent from the server to request a list of root URIs from the client. Roots allow
@@ -51,7 +49,7 @@ export const RootSchema = z
  * This request is typically used when the server needs to understand the file system
  * structure or access specific locations that the client has permission to read from.
  */
-export const ListRootsRequestSchema = RequestSchema.extend({
+export const ListRootsRequestSchema = z.extend(RequestSchema, {
   method: z.literal("roots/list"),
 });
 
@@ -60,7 +58,7 @@ export const ListRootsRequestSchema = RequestSchema.extend({
  * This result contains an array of Root objects, each representing a root directory
  * or file that the server can operate on.
  */
-export const ListRootsResultSchema = ResultSchema.extend({
+export const ListRootsResultSchema = z.extend(ResultSchema, {
   roots: z.array(RootSchema),
 });
 
@@ -69,6 +67,6 @@ export const ListRootsResultSchema = ResultSchema.extend({
  * This notification should be sent whenever the client adds, removes, or modifies any root.
  * The server should then request an updated list of roots using the ListRootsRequest.
  */
-export const RootsListChangedNotificationSchema = NotificationSchema.extend({
+export const RootsListChangedNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/roots/list_changed"),
 });

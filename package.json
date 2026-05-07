@@ -104,10 +104,13 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "zod": "^4.0.0"
   },
   "dependencies": {
-    "eventsource-parser": "^3.0.6",
-    "zod": "^3.25.0"
+    "eventsource-parser": "^3.0.8"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
   }
 }
