@@ -63,7 +63,18 @@ jobs:
           echo "next_tag=v$next" >> "$GITHUB_OUTPUT"
 
       # Update package.json (no git tag — we tag manually below).
-      - run: npm version ${{ steps.bump_tag.outputs.next_version }} --no-git-tag-version
+      # Skip if package.json already matches (e.g. re-running after a
+      # prior failed run that already committed the bump).
+      - name: Bump package.json
+        env:
+          NEXT_VERSION: ${{ steps.bump_tag.outputs.next_version }}
+        run: |
+          current=$(node -p "require('./package.json').version")
+          if [ "$current" = "$NEXT_VERSION" ]; then
+            echo "package.json already at $NEXT_VERSION, skipping bump"
+          else
+            npm version "$NEXT_VERSION" --no-git-tag-version
+          fi
 
       - name: Commit & tag
         run: |
