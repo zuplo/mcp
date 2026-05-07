@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { CursorSchema } from "../../../jsonrpc2/schemas/cursor.js";
 import {
   BaseRequestParamsSchema,
@@ -20,17 +20,19 @@ import {
 } from "../../../jsonrpc2/schemas/request.js";
 import { ResultSchema } from "../../../jsonrpc2/schemas/response.js";
 
-export const PaginatedRequestSchema = RequestSchema.extend({
-  params: BaseRequestParamsSchema.extend({
-    /**
-     * An opaque token representing the current pagination position.
-     * If provided, the server should return results starting after this cursor.
-     */
-    cursor: z.optional(CursorSchema),
-  }).optional(),
+export const PaginatedRequestSchema = z.extend(RequestSchema, {
+  params: z.optional(
+    z.extend(BaseRequestParamsSchema, {
+      /**
+       * An opaque token representing the current pagination position.
+       * If provided, the server should return results starting after this cursor.
+       */
+      cursor: z.optional(CursorSchema),
+    })
+  ),
 });
 
-export const PaginatedResultSchema = ResultSchema.extend({
+export const PaginatedResultSchema = z.extend(ResultSchema, {
   /**
    * An opaque token representing the pagination position after the last returned
    * result. If present, there may be more results available.

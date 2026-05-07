@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import type { z } from "zod/v4";
+import type * as z from "zod/mini";
 
 import type { EmptyResultSchema } from "../../jsonrpc2/schemas/response.js";
 import type {

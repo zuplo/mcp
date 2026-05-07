@@ -12,18 +12,16 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { JSONRPC_VERSION } from "../consts.js";
 
-export const BaseNotificationParamsSchema = z
-  .object({
-    /**
-     * This parameter name is reserved by MCP to allow clients and servers to
-     * attach additional metadata to their notifications.
-     */
-    _meta: z.optional(z.object({}).loose()),
-  })
-  .loose();
+export const BaseNotificationParamsSchema = z.looseObject({
+  /**
+   * This parameter name is reserved by MCP to allow clients and servers to
+   * attach additional metadata to their notifications.
+   */
+  _meta: z.optional(z.looseObject({})),
+});
 
 export const NotificationSchema = z.object({
   method: z.string(),
@@ -33,9 +31,7 @@ export const NotificationSchema = z.object({
 /**
  * A notification which does not expect a response.
  */
-export const JSONRPCNotificationSchema = z
-  .object({
-    jsonrpc: z.literal(JSONRPC_VERSION),
-    ...NotificationSchema.shape,
-  })
-  .strict();
+export const JSONRPCNotificationSchema = z.strictObject({
+  jsonrpc: z.literal(JSONRPC_VERSION),
+  ...NotificationSchema.shape,
+});

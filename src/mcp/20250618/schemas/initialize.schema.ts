@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseRequestParamsSchema,
   RequestSchema,
@@ -28,9 +28,9 @@ import { ImplementationSchema } from "./implementation.schema.js";
  * This request is sent from the client to the server when it first connects,
  * asking it to begin initialization.
  */
-export const InitializeRequestSchema = RequestSchema.extend({
+export const InitializeRequestSchema = z.extend(RequestSchema, {
   method: z.literal("initialize"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     /**
      * The latest version of the Model Context Protocol that the client supports.
      * The client MAY decide to support older versions as well.
@@ -45,7 +45,7 @@ export const InitializeRequestSchema = RequestSchema.extend({
  * After receiving an initialize request from the client, the server sends this
  * response.
  */
-export const InitializeResultSchema = ResultSchema.extend({
+export const InitializeResultSchema = z.extend(ResultSchema, {
   /**
    * The version of the Model Context Protocol that the server wants to use.
    * This may not match the version that the client requested. If the client

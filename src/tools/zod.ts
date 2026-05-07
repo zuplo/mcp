@@ -1,4 +1,4 @@
-import { type ZodObject, z } from "zod/v4";
+import * as z from "zod/mini";
 import type {
   InputParamValidator,
   InputParamValidatorReturn,
@@ -8,11 +8,14 @@ import type {
  * ZodValidator is a input JSON params validator class which uses Zod and
  * @implements {InputParamValidator}
  *
+ * Accepts schemas built with either the regular `zod` API (chainable) or
+ * the tree-shakable `zod/mini` API (functional).
+ *
  * @param S - the Zod schema object. This is used to "parse" and provide
  * validated params to tool calls.
  */
 
-export class ZodValidator<S extends ZodObject>
+export class ZodValidator<S extends z.core.$ZodObject>
   implements InputParamValidator<z.infer<S>>
 {
   readonly jsonSchema: object;
@@ -24,7 +27,7 @@ export class ZodValidator<S extends ZodObject>
   }
 
   parse(input: unknown): InputParamValidatorReturn<z.infer<S>> {
-    const parsed = this.schema.safeParse(input);
+    const parsed = z.safeParse(this.schema, input);
     return parsed.success
       ? { success: true, data: parsed.data, errorData: null }
       : {

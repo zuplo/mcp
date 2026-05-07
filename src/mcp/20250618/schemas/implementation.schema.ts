@@ -12,13 +12,13 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { BaseMetadataSchema } from "./base.schema.js";
 
 /**
  * Describes the name and version of an MCP implementation, with an optional
  * title for UI representation.
  */
-export const ImplementationSchema = BaseMetadataSchema.extend({
+export const ImplementationSchema = z.extend(BaseMetadataSchema, {
   version: z.string(),
 });

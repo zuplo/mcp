@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { NotificationSchema } from "../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -28,7 +28,7 @@ import {
 /**
  * Describes an argument that a prompt can accept.
  */
-export const PromptArgumentSchema = BaseMetadataSchema.extend({
+export const PromptArgumentSchema = z.extend(BaseMetadataSchema, {
   /**
    * A human-readable description of the argument.
    */
@@ -42,21 +42,24 @@ export const PromptArgumentSchema = BaseMetadataSchema.extend({
 /**
  * A prompt or prompt template that the server offers.
  */
-export const PromptSchema = BaseMetadataSchema.merge(IconsSchema).extend({
-  /**
-   * An optional description of what this prompt provides
-   */
-  description: z.optional(z.string()),
-  /**
-   * A list of arguments to use for templating the prompt.
-   */
-  arguments: z.optional(z.array(PromptArgumentSchema)),
+export const PromptSchema = z.extend(
+  z.extend(BaseMetadataSchema, IconsSchema.shape),
+  {
+    /**
+     * An optional description of what this prompt provides
+     */
+    description: z.optional(z.string()),
+    /**
+     * A list of arguments to use for templating the prompt.
+     */
+    arguments: z.optional(z.array(PromptArgumentSchema)),
 
-  /**
-   * See [specification/2025-11-25/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta: z.optional(z.object({}).loose()),
-});
+    /**
+     * See [specification/2025-11-25/basic/index#general-fields] for notes on _meta usage.
+     */
+    _meta: z.optional(z.looseObject({})),
+  }
+);
 
 /**
  * Describes a message returned as part of a prompt.
@@ -73,40 +76,38 @@ export const PromptMessageSchema = z.lazy(() => {
   } = require("./content.schema.js");
   const { ResourceLinkSchema } = require("./resource.schema.js");
 
-  return z
-    .object({
-      role: z.enum(["user", "assistant"]),
-      content: z.discriminatedUnion("type", [
-        TextContentSchema,
-        ImageContentSchema,
-        AudioContentSchema,
-        ResourceLinkSchema,
-        EmbeddedResourceSchema,
-      ]),
-    })
-    .loose();
+  return z.looseObject({
+    role: z.enum(["user", "assistant"]),
+    content: z.discriminatedUnion("type", [
+      TextContentSchema,
+      ImageContentSchema,
+      AudioContentSchema,
+      ResourceLinkSchema,
+      EmbeddedResourceSchema,
+    ]),
+  });
 });
 
 /**
  * Sent from the client to request a list of prompts and prompt templates the server has.
  */
-export const ListPromptsRequestSchema = PaginatedRequestSchema.extend({
+export const ListPromptsRequestSchema = z.extend(PaginatedRequestSchema, {
   method: z.literal("prompts/list"),
 });
 
 /**
  * The server's response to a prompts/list request from the client.
  */
-export const ListPromptsResultSchema = PaginatedResultSchema.extend({
+export const ListPromptsResultSchema = z.extend(PaginatedResultSchema, {
   prompts: z.array(PromptSchema),
 });
 
 /**
  * Used by the client to get a prompt provided by the server.
  */
-export const GetPromptRequestSchema = RequestSchema.extend({
+export const GetPromptRequestSchema = z.extend(RequestSchema, {
   method: z.literal("prompts/get"),
-  params: BaseRequestParamsSchema.extend({
+  params: z.extend(BaseRequestParamsSchema, {
     /**
      * The name of the prompt or prompt template.
      */
@@ -121,7 +122,7 @@ export const GetPromptRequestSchema = RequestSchema.extend({
 /**
  * The server's response to a prompts/get request from the client.
  */
-export const GetPromptResultSchema = ResultSchema.extend({
+export const GetPromptResultSchema = z.extend(ResultSchema, {
   /**
    * An optional description for the prompt.
    */
@@ -134,6 +135,9 @@ export const GetPromptResultSchema = ResultSchema.extend({
  * list of prompts it offers has changed. This may be issued by servers without
  * any previous subscription from the client.
  */
-export const PromptListChangedNotificationSchema = NotificationSchema.extend({
-  method: z.literal("notifications/prompts/list_changed"),
-});
+export const PromptListChangedNotificationSchema = z.extend(
+  NotificationSchema,
+  {
+    method: z.literal("notifications/prompts/list_changed"),
+  }
+);

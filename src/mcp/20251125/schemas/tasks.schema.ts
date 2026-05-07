@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BaseNotificationParamsSchema,
   NotificationSchema,
@@ -38,80 +38,74 @@ export const TaskStatusSchema = z.enum([
 /**
  * Metadata for augmenting a request with task execution.
  */
-export const TaskMetadataSchema = z
-  .object({
-    /**
-     * Requested duration in milliseconds to retain task from creation.
-     */
-    ttl: z.optional(z.number()),
-  })
-  .loose();
+export const TaskMetadataSchema = z.looseObject({
+  /**
+   * Requested duration in milliseconds to retain task from creation.
+   */
+  ttl: z.optional(z.number()),
+});
 
 /**
  * Metadata for associating messages with a task.
  */
-export const RelatedTaskMetadataSchema = z
-  .object({
-    /**
-     * The task identifier this message is associated with.
-     */
-    taskId: z.string(),
-  })
-  .loose();
+export const RelatedTaskMetadataSchema = z.looseObject({
+  /**
+   * The task identifier this message is associated with.
+   */
+  taskId: z.string(),
+});
 
 /**
  * Data associated with a task.
  */
-export const TaskSchema = z
-  .object({
-    /**
-     * The task identifier.
-     */
-    taskId: z.string(),
+export const TaskSchema = z.looseObject({
+  /**
+   * The task identifier.
+   */
+  taskId: z.string(),
 
-    /**
-     * Current task state.
-     */
-    status: TaskStatusSchema,
+  /**
+   * Current task state.
+   */
+  status: TaskStatusSchema,
 
-    /**
-     * Optional human-readable message describing the current task state.
-     */
-    statusMessage: z.optional(z.string()),
+  /**
+   * Optional human-readable message describing the current task state.
+   */
+  statusMessage: z.optional(z.string()),
 
-    /**
-     * ISO 8601 timestamp when the task was created.
-     */
-    createdAt: z.string(),
+  /**
+   * ISO 8601 timestamp when the task was created.
+   */
+  createdAt: z.string(),
 
-    /**
-     * ISO 8601 timestamp when the task was last updated.
-     */
-    lastUpdatedAt: z.string(),
+  /**
+   * ISO 8601 timestamp when the task was last updated.
+   */
+  lastUpdatedAt: z.string(),
 
-    /**
-     * Actual retention duration from creation in milliseconds, null for unlimited.
-     */
-    ttl: z.union([z.number(), z.null()]),
+  /**
+   * Actual retention duration from creation in milliseconds, null for unlimited.
+   */
+  ttl: z.union([z.number(), z.null()]),
 
-    /**
-     * Suggested polling interval in milliseconds.
-     */
-    pollInterval: z.optional(z.number()),
-  })
-  .loose();
+  /**
+   * Suggested polling interval in milliseconds.
+   */
+  pollInterval: z.optional(z.number()),
+});
 
 /**
  * A response to a task-augmented request.
  */
-export const CreateTaskResultSchema = ResultSchema.extend({
+export const CreateTaskResultSchema = z.extend(ResultSchema, {
   task: TaskSchema,
 });
 
 /**
  * A request to retrieve the state of a task.
  */
-export const GetTaskRequestSchema = RequestSchema.extend({
+export const GetTaskRequestSchema = z.extend(RequestSchema, {
   method: z.literal("tasks/get"),
   params: z.object({
     /**
@@ -124,12 +118,12 @@ export const GetTaskRequestSchema = RequestSchema.extend({
 /**
  * The response to a tasks/get request.
  */
-export const GetTaskResultSchema = ResultSchema.merge(TaskSchema);
+export const GetTaskResultSchema = z.extend(ResultSchema, TaskSchema.shape);
 
 /**
  * A request to retrieve the result of a completed task.
  */
-export const GetTaskPayloadRequestSchema = RequestSchema.extend({
+export const GetTaskPayloadRequestSchema = z.extend(RequestSchema, {
   method: z.literal("tasks/result"),
   params: z.object({
     /**
@@ -142,12 +136,14 @@ export const GetTaskPayloadRequestSchema = RequestSchema.extend({
 /**
  * The response to a tasks/result request.
  */
-export const GetTaskPayloadResultSchema = ResultSchema.extend({}).loose();
+export const GetTaskPayloadResultSchema = z.looseObject({
+  ...ResultSchema.shape,
+});
 
 /**
  * A request to cancel a task.
  */
-export const CancelTaskRequestSchema = RequestSchema.extend({
+export const CancelTaskRequestSchema = z.extend(RequestSchema, {
   method: z.literal("tasks/cancel"),
   params: z.object({
     /**
@@ -160,19 +156,19 @@ export const CancelTaskRequestSchema = RequestSchema.extend({
 /**
  * The response to a tasks/cancel request.
  */
-export const CancelTaskResultSchema = ResultSchema.merge(TaskSchema);
+export const CancelTaskResultSchema = z.extend(ResultSchema, TaskSchema.shape);
 
 /**
  * A request to retrieve a list of tasks.
  */
-export const ListTasksRequestSchema = PaginatedRequestSchema.extend({
+export const ListTasksRequestSchema = z.extend(PaginatedRequestSchema, {
   method: z.literal("tasks/list"),
 });
 
 /**
  * The response to a tasks/list request.
  */
-export const ListTasksResultSchema = PaginatedResultSchema.extend({
+export const ListTasksResultSchema = z.extend(PaginatedResultSchema, {
   tasks: z.array(TaskSchema),
 });
 
@@ -180,7 +176,7 @@ export const ListTasksResultSchema = PaginatedResultSchema.extend({
  * An optional notification from the receiver to the requestor, informing them
  * that a task's status has changed.
  */
-export const TaskStatusNotificationSchema = NotificationSchema.extend({
+export const TaskStatusNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/tasks/status"),
-  params: BaseNotificationParamsSchema.merge(TaskSchema),
+  params: z.extend(BaseNotificationParamsSchema, TaskSchema.shape),
 });

@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import {
   BlobResourceContentsSchema,
   TextResourceContentsSchema,
@@ -21,63 +21,55 @@ import {
 /**
  * Text provided to or from an LLM.
  */
-export const TextContentSchema = z
-  .object({
-    type: z.literal("text"),
+export const TextContentSchema = z.looseObject({
+  type: z.literal("text"),
 
-    /**
-     * The text content of the message.
-     */
-    text: z.string(),
-  })
-  .loose();
+  /**
+   * The text content of the message.
+   */
+  text: z.string(),
+});
 
 /**
  * An image provided to or from an LLM.
  */
-export const ImageContentSchema = z
-  .object({
-    type: z.literal("image"),
+export const ImageContentSchema = z.looseObject({
+  type: z.literal("image"),
 
-    /**
-     * The base64-encoded image data.
-     */
-    data: z.base64(),
+  /**
+   * The base64-encoded image data.
+   */
+  data: z.base64(),
 
-    /**
-     * The MIME type of the image. Different providers may support different
-     * image types.
-     */
-    mimeType: z.string(),
-  })
-  .loose();
+  /**
+   * The MIME type of the image. Different providers may support different
+   * image types.
+   */
+  mimeType: z.string(),
+});
 
 /**
  * An Audio provided to or from an LLM.
  */
-export const AudioContentSchema = z
-  .object({
-    type: z.literal("audio"),
+export const AudioContentSchema = z.looseObject({
+  type: z.literal("audio"),
 
-    /**
-     * The base64-encoded audio data.
-     */
-    data: z.base64(),
+  /**
+   * The base64-encoded audio data.
+   */
+  data: z.base64(),
 
-    /**
-     * The MIME type of the audio. Different providers may support different
-     * audio types.
-     */
-    mimeType: z.string(),
-  })
-  .loose();
+  /**
+   * The MIME type of the audio. Different providers may support different
+   * audio types.
+   */
+  mimeType: z.string(),
+});
 
 /**
  * The contents of a resource, embedded into a prompt or tool call result.
  */
-export const EmbeddedResourceSchema = z
-  .object({
-    type: z.literal("resource"),
-    resource: z.union([TextResourceContentsSchema, BlobResourceContentsSchema]),
-  })
-  .loose();
+export const EmbeddedResourceSchema = z.looseObject({
+  type: z.literal("resource"),
+  resource: z.union([TextResourceContentsSchema, BlobResourceContentsSchema]),
+});

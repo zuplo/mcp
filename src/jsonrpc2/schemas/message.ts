@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { JSONRPCErrorSchema } from "./error.js";
 import { JSONRPCNotificationSchema } from "./notifications.js";
 import { JSONRPCRequestSchema } from "./request.js";

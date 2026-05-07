@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { RequestSchema } from "../../../jsonrpc2/schemas/request.js";
 
 /**
@@ -20,6 +20,6 @@ import { RequestSchema } from "../../../jsonrpc2/schemas/request.js";
  * party is still alive. The receiver must promptly respond, or else may be
  * disconnected.
  */
-export const PingRequestSchema = RequestSchema.extend({
+export const PingRequestSchema = z.extend(RequestSchema, {
   method: z.literal("ping"),
 });

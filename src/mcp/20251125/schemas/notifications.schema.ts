@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { IdSchema } from "../../../jsonrpc2/schemas/id.js";
 import {
   BaseNotificationParamsSchema,
@@ -40,9 +40,9 @@ export {
  *
  * For task cancellation, use the `tasks/cancel` request instead of this notification.
  */
-export const CancelledNotificationSchema = NotificationSchema.extend({
+export const CancelledNotificationSchema = z.extend(NotificationSchema, {
   method: z.literal("notifications/cancelled"),
-  params: BaseNotificationParamsSchema.extend({
+  params: z.extend(BaseNotificationParamsSchema, {
     /**
      * The ID of the request to cancel.
      *
@@ -56,6 +56,6 @@ export const CancelledNotificationSchema = NotificationSchema.extend({
      * An optional string describing the reason for the cancellation. This MAY
      * be logged or presented to the user.
      */
-    reason: z.string().optional(),
+    reason: z.optional(z.string()),
   }),
 });

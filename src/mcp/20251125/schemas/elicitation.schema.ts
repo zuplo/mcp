@@ -12,7 +12,7 @@
  * and is attributed to the original authors under the License.
  */
 
-import { z } from "zod/v4";
+import * as z from "zod/mini";
 import { NotificationSchema } from "../../../jsonrpc2/schemas/notifications.js";
 import {
   BaseRequestParamsSchema,
@@ -21,68 +21,58 @@ import {
 import { ResultSchema } from "../../../jsonrpc2/schemas/response.js";
 import { TaskMetadataSchema } from "./tasks.schema.js";
 
-export const StringSchemaSchema = z
-  .object({
-    type: z.literal("string"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    minLength: z.optional(z.number()),
-    maxLength: z.optional(z.number()),
-    format: z.optional(z.enum(["email", "uri", "date", "date-time"])),
-    default: z.optional(z.string()),
-  })
-  .loose();
+export const StringSchemaSchema = z.looseObject({
+  type: z.literal("string"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  minLength: z.optional(z.number()),
+  maxLength: z.optional(z.number()),
+  format: z.optional(z.enum(["email", "uri", "date", "date-time"])),
+  default: z.optional(z.string()),
+});
 
-export const NumberSchemaSchema = z
-  .object({
-    type: z.enum(["number", "integer"]),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    minimum: z.optional(z.number()),
-    maximum: z.optional(z.number()),
-    default: z.optional(z.number()),
-  })
-  .loose();
+export const NumberSchemaSchema = z.looseObject({
+  type: z.enum(["number", "integer"]),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  minimum: z.optional(z.number()),
+  maximum: z.optional(z.number()),
+  default: z.optional(z.number()),
+});
 
-export const BooleanSchemaSchema = z
-  .object({
-    type: z.literal("boolean"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    default: z.optional(z.boolean()),
-  })
-  .loose();
+export const BooleanSchemaSchema = z.looseObject({
+  type: z.literal("boolean"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  default: z.optional(z.boolean()),
+});
 
 /**
  * Schema for single-selection enumeration without display titles for options.
  */
-export const UntitledSingleSelectEnumSchemaSchema = z
-  .object({
-    type: z.literal("string"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    enum: z.array(z.string()),
-    default: z.optional(z.string()),
-  })
-  .loose();
+export const UntitledSingleSelectEnumSchemaSchema = z.looseObject({
+  type: z.literal("string"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  enum: z.array(z.string()),
+  default: z.optional(z.string()),
+});
 
 /**
  * Schema for single-selection enumeration with display titles for each option.
  */
-export const TitledSingleSelectEnumSchemaSchema = z
-  .object({
-    type: z.literal("string"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    oneOf: z.array(
-      z.object({
-        const: z.string(),
-        title: z.string(),
-      })
-    ),
-    default: z.optional(z.string()),
-  })
-  .loose();
+export const TitledSingleSelectEnumSchemaSchema = z.looseObject({
+  type: z.literal("string"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  oneOf: z.array(
+    z.object({
+      const: z.string(),
+      title: z.string(),
+    })
+  ),
+  default: z.optional(z.string()),
+});
 
 /**
  * Combined single selection enumeration.
@@ -95,42 +85,38 @@ export const SingleSelectEnumSchemaSchema = z.union([
 /**
  * Schema for multiple-selection enumeration without display titles for options.
  */
-export const UntitledMultiSelectEnumSchemaSchema = z
-  .object({
-    type: z.literal("array"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    minItems: z.optional(z.number()),
-    maxItems: z.optional(z.number()),
-    items: z.object({
-      type: z.literal("string"),
-      enum: z.array(z.string()),
-    }),
-    default: z.optional(z.array(z.string())),
-  })
-  .loose();
+export const UntitledMultiSelectEnumSchemaSchema = z.looseObject({
+  type: z.literal("array"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  minItems: z.optional(z.number()),
+  maxItems: z.optional(z.number()),
+  items: z.object({
+    type: z.literal("string"),
+    enum: z.array(z.string()),
+  }),
+  default: z.optional(z.array(z.string())),
+});
 
 /**
  * Schema for multiple-selection enumeration with display titles for each option.
  */
-export const TitledMultiSelectEnumSchemaSchema = z
-  .object({
-    type: z.literal("array"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    minItems: z.optional(z.number()),
-    maxItems: z.optional(z.number()),
-    items: z.object({
-      anyOf: z.array(
-        z.object({
-          const: z.string(),
-          title: z.string(),
-        })
-      ),
-    }),
-    default: z.optional(z.array(z.string())),
-  })
-  .loose();
+export const TitledMultiSelectEnumSchemaSchema = z.looseObject({
+  type: z.literal("array"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  minItems: z.optional(z.number()),
+  maxItems: z.optional(z.number()),
+  items: z.object({
+    anyOf: z.array(
+      z.object({
+        const: z.string(),
+        title: z.string(),
+      })
+    ),
+  }),
+  default: z.optional(z.array(z.string())),
+});
 
 /**
  * Combined multiple selection enumeration.
@@ -143,16 +129,14 @@ export const MultiSelectEnumSchemaSchema = z.union([
 /**
  * Legacy titled enum schema (deprecated).
  */
-export const LegacyTitledEnumSchemaSchema = z
-  .object({
-    type: z.literal("string"),
-    title: z.optional(z.string()),
-    description: z.optional(z.string()),
-    enum: z.array(z.string()),
-    enumNames: z.optional(z.array(z.string())),
-    default: z.optional(z.string()),
-  })
-  .loose();
+export const LegacyTitledEnumSchemaSchema = z.looseObject({
+  type: z.literal("string"),
+  title: z.optional(z.string()),
+  description: z.optional(z.string()),
+  enum: z.array(z.string()),
+  enumNames: z.optional(z.array(z.string())),
+  default: z.optional(z.string()),
+});
 
 /**
  * Union type for all enum schemas.
@@ -177,7 +161,7 @@ export const PrimitiveSchemaDefinitionSchema = z.union([
 /**
  * Parameters for form-based elicitation.
  */
-export const ElicitRequestFormParamsSchema = BaseRequestParamsSchema.extend({
+export const ElicitRequestFormParamsSchema = z.extend(BaseRequestParamsSchema, {
   /**
    * The elicitation mode.
    */
@@ -192,14 +176,12 @@ export const ElicitRequestFormParamsSchema = BaseRequestParamsSchema.extend({
    * A restricted subset of JSON Schema.
    * Only top-level properties are allowed, without nesting.
    */
-  requestedSchema: z
-    .object({
-      $schema: z.optional(z.string()),
-      type: z.literal("object"),
-      properties: z.record(z.string(), PrimitiveSchemaDefinitionSchema),
-      required: z.optional(z.array(z.string())),
-    })
-    .loose(),
+  requestedSchema: z.looseObject({
+    $schema: z.optional(z.string()),
+    type: z.literal("object"),
+    properties: z.record(z.string(), PrimitiveSchemaDefinitionSchema),
+    required: z.optional(z.array(z.string())),
+  }),
 
   /**
    * If specified, the caller is requesting task-augmented execution for this request.
@@ -210,7 +192,7 @@ export const ElicitRequestFormParamsSchema = BaseRequestParamsSchema.extend({
 /**
  * Parameters for URL-based elicitation.
  */
-export const ElicitRequestURLParamsSchema = BaseRequestParamsSchema.extend({
+export const ElicitRequestURLParamsSchema = z.extend(BaseRequestParamsSchema, {
   /**
    * The elicitation mode.
    */
@@ -248,7 +230,7 @@ export const ElicitRequestParamsSchema = z.union([
 /**
  * A request from the server to elicit additional information from the user via the client.
  */
-export const ElicitRequestSchema = RequestSchema.extend({
+export const ElicitRequestSchema = z.extend(RequestSchema, {
   method: z.literal("elicitation/create"),
   params: ElicitRequestParamsSchema,
 });
@@ -256,7 +238,7 @@ export const ElicitRequestSchema = RequestSchema.extend({
 /**
  * The client's response to an elicitation request.
  */
-export const ElicitResultSchema = ResultSchema.extend({
+export const ElicitResultSchema = z.extend(ResultSchema, {
   /**
    * The user action in response to the elicitation.
    * - "accept": User submitted the form/confirmed the action
@@ -282,12 +264,15 @@ export const ElicitResultSchema = ResultSchema.extend({
  * An optional notification from the server to the client, informing it of a
  * completion of an out-of-band elicitation request.
  */
-export const ElicitationCompleteNotificationSchema = NotificationSchema.extend({
-  method: z.literal("notifications/elicitation/complete"),
-  params: z.object({
-    /**
-     * The ID of the elicitation that completed.
-     */
-    elicitationId: z.string(),
-  }),
-});
+export const ElicitationCompleteNotificationSchema = z.extend(
+  NotificationSchema,
+  {
+    method: z.literal("notifications/elicitation/complete"),
+    params: z.object({
+      /**
+       * The ID of the elicitation that completed.
+       */
+      elicitationId: z.string(),
+    }),
+  }
+);
