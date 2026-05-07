@@ -3,6 +3,13 @@ on:
   release:
     types: [published]
 
+# One in-flight publish per release. If a release gets re-published
+# (e.g. delete + recreate), serialize to avoid concurrent npm publishes
+# stomping on each other.
+concurrency:
+  group: publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
 permissions:
   id-token: write # Required for OIDC - https://docs.npmjs.com/trusted-publishers
   contents: read
