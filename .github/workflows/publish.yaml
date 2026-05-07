@@ -28,7 +28,10 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      - run: npm install -g npm@latest
+      # Pin npm and use --force to avoid the self-upgrade race that leaves
+      # a half-installed module tree (Cannot find module 'promise-retry').
+      # We need npm 11.5+ for OIDC trusted publishers; 11.5.x is known good.
+      - run: npm install -g --force npm@11.5.1
       - run: npm ci
       - run: npm run build
 
