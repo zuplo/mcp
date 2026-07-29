@@ -1,22 +1,7 @@
-![zuplo mcp logo](assets/zuplo-mcp.png)
+# @zuplo/mcp
 
-<h1>
-  <p align="center">
-    <code>@zuplo/mcp</code>
-  </p>
-</h1>
-  <p align="center">
-    A <code>fetch</code> API based, remote server first, TypeScript SDK for MCP.
-    <br />
-    <a href="#about">About</a>
-    ·
-    <a href="#documentation">Documentation</a>
-    ·
-    <a href="#contributing">Contributing</a>
-  </p>
-</p>
-
----
+> [!CAUTION]
+> The package is deprecated and no longer supported. Use the [official SDK instead](https://github.com/modelcontextprotocol/typescript-sdk).
 
 `@zuplo/mcp` is a stateless, remote server first MCP SDK that aims to be ["minimum common API" compliant as defined by the WinterTC](https://min-common-api.proposal.wintertc.org/).
 It uses the [`fetch` APIs](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and is intended to work out of the box on Zuplo, Node, Deno, Workerd, etc.
